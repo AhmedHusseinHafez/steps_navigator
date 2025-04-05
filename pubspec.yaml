@@ -1,0 +1,44 @@
+name: steps_navigator
+description: A new Flutter package project.
+
+license: MIT
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+homepage: "https://github.com/AhmedHusseinHafez/social_auth"
+repository: "https://github.com/AhmedHusseinHafez/social_auth"
+
+version: 1.0.1
+
+environment:
+  sdk: ^3.7.2
+  flutter: ">=1.17.0"
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  
+  #For State Management
+  flutter_bloc: ^9.1.0
+  bloc: ^9.0.0
+  
+  # For Gen Models
+  freezed_annotation: ^3.0.0
+
+dev_dependencies:
+  bloc_test: ^10.0.0
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+  # For Gen Models
+  build_runner: ^2.4.15
+  json_serializable: ^6.9.4
+  freezed: ^3.0.4
+
+flutter:
+
+  uses-material-design: true
