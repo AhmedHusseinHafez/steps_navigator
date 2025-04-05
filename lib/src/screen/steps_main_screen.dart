@@ -130,6 +130,7 @@ class _StepsNavigatorState extends State<StepsNavigator> {
           currentSubStep: state.currentSubStep,
           onBackPressed: cubit.onBackPressed,
           onNextPressed: cubit.onNextPressed,
+
           customBackButton: widget.customBackButton,
           customNextButton: widget.customNextButton,
           padding: widget.padding,

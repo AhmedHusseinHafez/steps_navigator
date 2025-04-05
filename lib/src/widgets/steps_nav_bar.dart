@@ -112,7 +112,7 @@ class StepsNavBar extends StatelessWidget {
     // Combine the callbacks: customCallback (if exists) + requiredCallback
     combinedCallback() {
       customCallback?.call(); // Call the custom callback if it exists
-      requiredCallback(); // Always call the required navigation callback
+      requiredCallback; // Always call the required navigation callback
     }
 
     // Return a new button with the combined callback
