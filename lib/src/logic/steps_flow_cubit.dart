@@ -5,10 +5,11 @@ part 'steps_flow_cubit.freezed.dart';
 part 'steps_flow_state.dart';
 
 class StepsFlowCubit extends Cubit<StepsFlowState> {
-  StepsFlowCubit({required this.totalSubSteps})
+  StepsFlowCubit({required this.totalSubSteps, required this.subStepsPerStep})
     : super(const StepsFlowState(currentStep: 1, currentSubStep: 1));
 
   final int totalSubSteps;
+  final List<int> subStepsPerStep;
 
   void onNextPressed() {
     final newSubStep = (state.currentSubStep + 1).clamp(1, totalSubSteps);
@@ -25,8 +26,13 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
   }
 
   int _determineStep(int subStep) {
-    if (subStep <= 4) return 1;
-    if (subStep <= 9) return 2;
-    return 3;
+    int cumulativeSubSteps = 0;
+    for (int i = 0; i < subStepsPerStep.length; i++) {
+      cumulativeSubSteps += subStepsPerStep[i];
+      if (subStep <= cumulativeSubSteps) {
+        return i + 1;
+      }
+    }
+    return subStepsPerStep.length; // Fallback
   }
 }

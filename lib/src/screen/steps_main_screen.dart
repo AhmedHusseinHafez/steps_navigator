@@ -22,6 +22,7 @@ class StepsMainScreen extends StatefulWidget {
     this.spaceBetweenButtonAndSteps,
     this.pageAnimationDuration,
     this.pageAnimationCurve,
+    required this.subStepsPerStep,
   });
   final PreferredSizeWidget? appBar;
   final List<Widget> screens;
@@ -41,6 +42,8 @@ class StepsMainScreen extends StatefulWidget {
   final Duration? pageAnimationDuration;
   final Curve? pageAnimationCurve;
 
+  final List<int> subStepsPerStep;
+
   @override
   State<StepsMainScreen> createState() => _StepsMainScreenState();
 }
@@ -52,12 +55,22 @@ class _StepsMainScreenState extends State<StepsMainScreen> {
   void initState() {
     super.initState();
     _pageController = PageController();
+    // Validate inputs
+    assert(widget.totalSteps == widget.subStepsPerStep.length);
+    assert(
+      widget.totalSubSteps == widget.subStepsPerStep.reduce((a, b) => a + b),
+    );
+    assert(widget.screens.length == widget.totalSubSteps);
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => StepsFlowCubit(totalSubSteps: widget.totalSubSteps),
+      create:
+          (context) => StepsFlowCubit(
+            totalSubSteps: widget.totalSubSteps,
+            subStepsPerStep: widget.subStepsPerStep,
+          ),
       child: Scaffold(
         appBar: widget.appBar,
         body: _bodyBloc(),
@@ -108,6 +121,7 @@ class _StepsMainScreenState extends State<StepsMainScreen> {
       builder: (context, state) {
         final cubit = context.read<StepsFlowCubit>();
         return StepsNavBar(
+          subStepsPerStep: widget.subStepsPerStep,
           totalSteps: widget.totalSteps,
           currentStep: state.currentStep,
           currentSubStep: state.currentSubStep,

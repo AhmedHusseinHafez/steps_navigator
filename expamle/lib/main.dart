@@ -11,6 +11,9 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    const totalSteps = 4;
+    const subStepsPerStep = [3, 4, 2, 5]; // Custom substeps for each step
+    final totalSubSteps = subStepsPerStep.reduce((a, b) => a + b);
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -18,14 +21,21 @@ class MyApp extends StatelessWidget {
       ),
       home: Scaffold(
         body: StepsMainScreen(
+          subStepsPerStep: subStepsPerStep,
+
           padding: EdgeInsets.symmetric(horizontal: 15),
           progressColor: Colors.green,
           stepColor: Colors.lime,
           spacing: 8,
           stepHeight: 9,
-          // customNextButton: Icon(Icons.arrow_forward),
+          customNextButton: IconButton(
+            icon: Icon(Icons.arrow_forward),
+            onPressed: () {
+              print('Next button pressed');
+            },
+          ),
           appBar: AppBar(title: const Text("Steps Navigator")),
-          totalSubSteps: 14,
+          totalSubSteps: totalSubSteps,
           screens: [
             const Center(child: Text("Step 1")),
             const Center(child: Text("Step 2")),
@@ -43,7 +53,7 @@ class MyApp extends StatelessWidget {
             const Center(child: Text("Step 13")),
             const Center(child: Text("Step 14")),
           ],
-          totalSteps: 3,
+          totalSteps: totalSteps,
         ),
       ),
     );

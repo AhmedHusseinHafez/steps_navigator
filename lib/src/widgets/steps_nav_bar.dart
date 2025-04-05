@@ -9,6 +9,7 @@ class StepsNavBar extends StatelessWidget {
     required this.currentStep,
     required this.onBackPressed,
     required this.onNextPressed,
+    required this.subStepsPerStep,
     this.padding,
     this.customBackButton,
     this.customNextButton,
@@ -24,14 +25,12 @@ class StepsNavBar extends StatelessWidget {
   final int totalSteps;
   final int currentSubStep;
   final int currentStep;
-
+  final List<int> subStepsPerStep;
   final EdgeInsetsGeometry? padding;
   final Widget? customBackButton;
   final Widget? customNextButton;
-
   final Function() onBackPressed;
   final Function() onNextPressed;
-
   final Color? stepColor;
   final Color? progressColor;
   final Curve? progressCurve;
@@ -48,7 +47,7 @@ class StepsNavBar extends StatelessWidget {
       children: [
         StepProgressWithSpacing(
           totalSteps: totalSteps,
-          currentStep: _calculateCurrentStepFactor(currentSubStep),
+          currentStep: _calculateCurrentStepFactor(),
           stepHeight: stepHeight ?? 5,
           spacing: spacing ?? 6,
           progressColor: progressColor,
@@ -60,31 +59,98 @@ class StepsNavBar extends StatelessWidget {
           padding: padding ?? EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              customBackButton ??
-                  TextButton(
-                    onPressed: onBackPressed,
-                    child: Text(
-                      "Back",
-                      style: const TextStyle(
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-              customNextButton ??
-                  ElevatedButton(onPressed: onNextPressed, child: Text("Next")),
-            ],
+            children: [_buildBackButton(), _buildNextButton()],
           ),
         ),
       ],
     );
   }
 
-  double _calculateCurrentStepFactor(currentSubStep) {
-    if (currentStep == 1) {
-      return currentSubStep * 0.25;
-    } else {
-      return (currentSubStep * 0.2) + 0.2;
+  Widget _buildBackButton() {
+    if (customBackButton == null) {
+      return TextButton(
+        onPressed: onBackPressed,
+        child: Text(
+          "Back",
+          style: const TextStyle(decoration: TextDecoration.underline),
+        ),
+      );
     }
+
+    return _wrapButtonWithCallback(
+      button: customBackButton!,
+      requiredCallback: onBackPressed,
+    );
+  }
+
+  Widget _buildNextButton() {
+    if (customNextButton == null) {
+      return ElevatedButton(onPressed: onNextPressed, child: Text("Next"));
+    }
+
+    return _wrapButtonWithCallback(
+      button: customNextButton!,
+      requiredCallback: onNextPressed,
+    );
+  }
+
+  Widget _wrapButtonWithCallback({
+    required Widget button,
+    required VoidCallback requiredCallback,
+  }) {
+    VoidCallback? customCallback;
+
+    // Try to extract the onPressed callback from common button types
+    if (button is ElevatedButton) {
+      customCallback = button.onPressed;
+    } else if (button is TextButton) {
+      customCallback = button.onPressed;
+    } else if (button is IconButton) {
+      customCallback = button.onPressed;
+    }
+
+    // Combine the callbacks: customCallback (if exists) + requiredCallback
+    combinedCallback() {
+      customCallback?.call(); // Call the custom callback if it exists
+      requiredCallback(); // Always call the required navigation callback
+    }
+
+    // Return a new button with the combined callback
+    if (button is ElevatedButton) {
+      return ElevatedButton(
+        onPressed: combinedCallback,
+        style: button.style,
+        child: button.child,
+      );
+    } else if (button is TextButton) {
+      return TextButton(
+        onPressed: combinedCallback,
+        style: button.style,
+        child: button,
+      );
+    } else if (button is IconButton) {
+      return IconButton(
+        onPressed: combinedCallback,
+        icon: button.icon,
+        color: button.color,
+        iconSize: button.iconSize,
+      );
+    }
+
+    // Fallback: Wrap unknown widget types with GestureDetector
+    return GestureDetector(onTap: combinedCallback, child: button);
+  }
+
+  double _calculateCurrentStepFactor() {
+    int cumulativeSubSteps = 0;
+    int totalPreviousSubSteps = 0;
+
+    for (int i = 0; i < currentStep - 1; i++) {
+      totalPreviousSubSteps += subStepsPerStep[i];
+    }
+
+    cumulativeSubSteps = currentSubStep - totalPreviousSubSteps;
+    double stepFraction = cumulativeSubSteps / subStepsPerStep[currentStep - 1];
+    return (currentStep - 1) + stepFraction;
   }
 }
