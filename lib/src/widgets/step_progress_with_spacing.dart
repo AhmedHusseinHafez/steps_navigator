@@ -5,6 +5,10 @@ class StepProgressWithSpacing extends StatelessWidget {
   final double currentStep;
   final double stepHeight;
   final double spacing;
+  final Color? stepColor;
+  final Color? progressColor;
+  final Curve? progressCurve;
+  final Duration? progressMoveDuration;
 
   const StepProgressWithSpacing({
     super.key,
@@ -12,6 +16,10 @@ class StepProgressWithSpacing extends StatelessWidget {
     required this.currentStep,
     this.stepHeight = 10.0,
     this.spacing = 10.0,
+    this.stepColor,
+    this.progressColor,
+    this.progressCurve,
+    this.progressMoveDuration,
   });
 
   @override
@@ -32,15 +40,20 @@ class StepProgressWithSpacing extends StatelessWidget {
                   Container(
                     width: stepWidth - ((index < totalSteps - 1) ? spacing : 0),
                     height: stepHeight,
-                    color: Colors.red,
+
+                    color: stepColor ?? Colors.grey[300],
                   ),
                   AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
+                    curve: progressCurve ?? Curves.linear,
+                    duration:
+                        progressMoveDuration ??
+                        const Duration(milliseconds: 300),
                     width:
                         (stepWidth - ((index < totalSteps - 1) ? spacing : 0)) *
                         stepProgress,
                     height: stepHeight,
-                    color: Colors.amber,
+
+                    color: progressColor ?? Colors.blue,
                   ),
                 ],
               ),

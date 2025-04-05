@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:steps_navigator/logic/steps_flow_cubit.dart';
-import 'package:steps_navigator/widgets/steps_nav_bar.dart';
+import 'package:steps_navigator/src/logic/steps_flow_cubit.dart';
+import 'package:steps_navigator/src/widgets/steps_nav_bar.dart';
 
 class StepsMainScreen extends StatefulWidget {
   const StepsMainScreen({
@@ -9,10 +9,37 @@ class StepsMainScreen extends StatefulWidget {
     this.appBar,
     required this.screens,
     required this.totalSteps,
+    required this.totalSubSteps,
+    this.stepColor,
+    this.progressColor,
+    this.progressCurve,
+    this.progressMoveDuration,
+    this.stepHeight,
+    this.spacing,
+    this.padding,
+    this.customBackButton,
+    this.customNextButton,
+    this.spaceBetweenButtonAndSteps,
+    this.pageAnimationDuration,
+    this.pageAnimationCurve,
   });
   final PreferredSizeWidget? appBar;
   final List<Widget> screens;
   final int totalSteps;
+  final int totalSubSteps;
+
+  final Color? stepColor;
+  final Color? progressColor;
+  final Curve? progressCurve;
+  final Duration? progressMoveDuration;
+  final double? stepHeight;
+  final double? spacing;
+  final EdgeInsetsGeometry? padding;
+  final Widget? customBackButton;
+  final Widget? customNextButton;
+  final double? spaceBetweenButtonAndSteps;
+  final Duration? pageAnimationDuration;
+  final Curve? pageAnimationCurve;
 
   @override
   State<StepsMainScreen> createState() => _StepsMainScreenState();
@@ -29,13 +56,16 @@ class _StepsMainScreenState extends State<StepsMainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: widget.appBar,
-      body: _bodyBloc(),
-      bottomNavigationBar: SafeArea(
-        child: SizedBox(
-          height: kBottomNavigationBarHeight * 1.33,
-          child: _buildStepsNavBar(),
+    return BlocProvider(
+      create: (context) => StepsFlowCubit(totalSubSteps: widget.totalSubSteps),
+      child: Scaffold(
+        appBar: widget.appBar,
+        body: _bodyBloc(),
+        bottomNavigationBar: SafeArea(
+          child: SizedBox(
+            height: kBottomNavigationBarHeight * 1.33,
+            child: _buildStepsNavBar(),
+          ),
         ),
       ),
     );
@@ -50,8 +80,10 @@ class _StepsMainScreenState extends State<StepsMainScreen> {
         if (_pageController.hasClients) {
           _pageController.animateToPage(
             state.currentSubStep - 1,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeInOut,
+            duration:
+                widget.pageAnimationDuration ??
+                const Duration(milliseconds: 200),
+            curve: widget.pageAnimationCurve ?? Curves.easeInOut,
           );
         }
       },
@@ -81,6 +113,16 @@ class _StepsMainScreenState extends State<StepsMainScreen> {
           currentSubStep: state.currentSubStep,
           onBackPressed: cubit.onBackPressed,
           onNextPressed: cubit.onNextPressed,
+          customBackButton: widget.customBackButton,
+          customNextButton: widget.customNextButton,
+          padding: widget.padding,
+          progressColor: widget.progressColor,
+          progressCurve: widget.progressCurve,
+          progressMoveDuration: widget.progressMoveDuration,
+          spacing: widget.spacing,
+          stepColor: widget.stepColor,
+          stepHeight: widget.stepHeight,
+          spaceBetweenButtonAndSteps: widget.spaceBetweenButtonAndSteps,
         );
       },
     );

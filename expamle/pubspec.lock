@@ -211,11 +211,9 @@ packages:
   steps_navigator:
     dependency: "direct main"
     description:
-      path: "."
-      ref: main
-      resolved-ref: b2885541b1f8244215adc65d7c5ef454a2f5ea89
-      url: "https://github.com/AhmedHusseinHafez/steps_navigator.git"
-    source: git
+      path: ".."
+      relative: true
+    source: path
     version: "1.0.1"
   stream_channel:
     dependency: transitive

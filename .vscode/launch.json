@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "steps_navigator",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "steps_navigator (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "steps_navigator (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "expamle",
+            "cwd": "expamle",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "expamle (profile mode)",
+            "cwd": "expamle",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "expamle (release mode)",
+            "cwd": "expamle",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}
