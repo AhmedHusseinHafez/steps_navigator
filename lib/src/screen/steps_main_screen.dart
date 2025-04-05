@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:steps_navigator/src/logic/steps_flow_cubit.dart';
 import 'package:steps_navigator/src/widgets/steps_nav_bar.dart';
 
-class StepsMainScreen extends StatefulWidget {
-  const StepsMainScreen({
+class StepsNavigator extends StatefulWidget {
+  const StepsNavigator({
     super.key,
     this.appBar,
     required this.screens,
@@ -47,10 +47,10 @@ class StepsMainScreen extends StatefulWidget {
   final void Function(int step, int subStep)? onSubStepChanged;
 
   @override
-  State<StepsMainScreen> createState() => _StepsMainScreenState();
+  State<StepsNavigator> createState() => _StepsNavigatorState();
 }
 
-class _StepsMainScreenState extends State<StepsMainScreen> {
+class _StepsNavigatorState extends State<StepsNavigator> {
   late final PageController _pageController;
 
   @override

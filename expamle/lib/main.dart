@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.black),
       ),
       home: Scaffold(
-        body: StepsMainScreen(
+        body: StepsNavigator(
           subStepsPerStep: subStepsPerStep,
 
           padding: EdgeInsets.symmetric(horizontal: 15),
