@@ -24,6 +24,7 @@ class StepsNavigator extends StatefulWidget {
     this.pageAnimationCurve,
     required this.subStepsPerStep,
     this.onSubStepChanged,
+    this.isOnNextButtonEnabled = true,
   });
   final PreferredSizeWidget? appBar;
   final List<Widget> screens;
@@ -42,6 +43,7 @@ class StepsNavigator extends StatefulWidget {
   final double? spaceBetweenButtonAndSteps;
   final Duration? pageAnimationDuration;
   final Curve? pageAnimationCurve;
+  final bool? isOnNextButtonEnabled;
 
   final List<int> subStepsPerStep;
   final void Function(int step, int subStep)? onSubStepChanged;
@@ -129,7 +131,11 @@ class _StepsNavigatorState extends State<StepsNavigator> {
           currentStep: state.currentStep,
           currentSubStep: state.currentSubStep,
           onBackPressed: cubit.onBackPressed,
-          onNextPressed: cubit.onNextPressed,
+          onNextPressed:
+              (widget.isOnNextButtonEnabled ?? true)
+                  ? cubit.onNextPressed
+                  : null,
+
           customBackButton: widget.customBackButton,
           customNextButton: widget.customNextButton,
           padding: widget.padding,

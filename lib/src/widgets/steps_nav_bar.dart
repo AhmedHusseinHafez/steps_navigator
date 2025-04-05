@@ -30,7 +30,7 @@ class StepsNavBar extends StatelessWidget {
   final Widget? customBackButton;
   final Widget? customNextButton;
   final Function() onBackPressed;
-  final Function() onNextPressed;
+  final Function()? onNextPressed;
   final Color? stepColor;
   final Color? progressColor;
   final Curve? progressCurve;
@@ -96,7 +96,7 @@ class StepsNavBar extends StatelessWidget {
 
   Widget _wrapButtonWithCallback({
     required Widget button,
-    required VoidCallback requiredCallback,
+    required VoidCallback? requiredCallback,
   }) {
     VoidCallback? customCallback;
 
@@ -112,7 +112,7 @@ class StepsNavBar extends StatelessWidget {
     // Combine the callbacks: customCallback (if exists) + requiredCallback
     combinedCallback() {
       customCallback?.call(); // Call the custom callback if it exists
-      requiredCallback(); // Always call the required navigation callback
+      requiredCallback?.call(); // Always call the required navigation callback
     }
 
     // Return a new button with the combined callback

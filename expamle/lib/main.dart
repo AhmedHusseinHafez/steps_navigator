@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
           onSubStepChanged: (step, subStep) {
             debugPrint('Current Step: $step, Current SubStep: $subStep');
           },
+          isOnNextButtonEnabled: false,
           customNextButton: IconButton(
             icon: Icon(Icons.arrow_forward),
             onPressed: () {
