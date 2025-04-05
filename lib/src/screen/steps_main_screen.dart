@@ -23,6 +23,7 @@ class StepsMainScreen extends StatefulWidget {
     this.pageAnimationDuration,
     this.pageAnimationCurve,
     required this.subStepsPerStep,
+    this.onSubStepChanged,
   });
   final PreferredSizeWidget? appBar;
   final List<Widget> screens;
@@ -43,6 +44,7 @@ class StepsMainScreen extends StatefulWidget {
   final Curve? pageAnimationCurve;
 
   final List<int> subStepsPerStep;
+  final void Function(int step, int subStep)? onSubStepChanged;
 
   @override
   State<StepsMainScreen> createState() => _StepsMainScreenState();
@@ -70,6 +72,7 @@ class _StepsMainScreenState extends State<StepsMainScreen> {
           (context) => StepsFlowCubit(
             totalSubSteps: widget.totalSubSteps,
             subStepsPerStep: widget.subStepsPerStep,
+            onSubStepChanged: widget.onSubStepChanged,
           ),
       child: Scaffold(
         appBar: widget.appBar,

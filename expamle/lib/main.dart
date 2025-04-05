@@ -28,12 +28,16 @@ class MyApp extends StatelessWidget {
           stepColor: Colors.lime,
           spacing: 8,
           stepHeight: 9,
+          onSubStepChanged: (step, subStep) {
+            debugPrint('Current Step: $step, Current SubStep: $subStep');
+          },
           customNextButton: IconButton(
             icon: Icon(Icons.arrow_forward),
             onPressed: () {
-              print('Next button pressed');
+              debugPrint('Next button pressed');
             },
           ),
+
           appBar: AppBar(title: const Text("Steps Navigator")),
           totalSubSteps: totalSubSteps,
           screens: [
