@@ -5,8 +5,8 @@ license: MIT
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-homepage: "https://github.com/AhmedHusseinHafez/social_auth"
-repository: "https://github.com/AhmedHusseinHafez/social_auth"
+homepage: "https://github.com/AhmedHusseinHafez/steps_navigator"
+repository: "https://github.com/AhmedHusseinHafez/steps_navigator"
 
 version: 1.0.1
 
@@ -24,7 +24,7 @@ dependencies:
   #For State Management
   flutter_bloc: ^9.1.0
   bloc: ^9.0.0
-  
+
   # For Gen Models
   freezed_annotation: ^3.0.0
 
