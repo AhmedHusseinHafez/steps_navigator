@@ -25,6 +25,7 @@ class StepsNavigator extends StatefulWidget {
     required this.subStepsPerStep,
     this.onSubStepChanged,
     this.onNextValidation,
+    this.initialPage = 0,
   });
   final PreferredSizeWidget? appBar;
   final List<Widget> screens;
@@ -43,6 +44,7 @@ class StepsNavigator extends StatefulWidget {
   final double? spaceBetweenButtonAndSteps;
   final Duration? pageAnimationDuration;
   final Curve? pageAnimationCurve;
+  final int? initialPage;
 
   final List<int> subStepsPerStep;
   final void Function(int step, int subStep)? onSubStepChanged;
@@ -59,7 +61,7 @@ class _StepsNavigatorState extends State<StepsNavigator> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
+    _pageController = PageController(initialPage: widget.initialPage ?? 0);
     // Validate inputs
     assert(widget.totalSteps == widget.subStepsPerStep.length);
     assert(
