@@ -63,10 +63,6 @@ class _StepsNavigatorState extends State<StepsNavigator> {
     super.initState();
     _pageController = PageController(initialPage: widget.initialPage ?? 0);
 
-    if (widget.initialPage != null) {
-      widget.onSubStepChanged?.call(widget.totalSteps, widget.initialPage!);
-    }
-
     // Validate inputs
     assert(widget.totalSteps == widget.subStepsPerStep.length);
     assert(
@@ -84,6 +80,7 @@ class _StepsNavigatorState extends State<StepsNavigator> {
             subStepsPerStep: widget.subStepsPerStep,
             onSubStepChanged: widget.onSubStepChanged,
             onNextValidation: widget.onNextValidation,
+            initialSubStep: (widget.initialPage ?? 0) + 1,
           ),
       child: Scaffold(
         appBar: widget.appBar,

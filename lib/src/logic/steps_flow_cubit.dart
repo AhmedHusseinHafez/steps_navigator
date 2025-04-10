@@ -10,7 +10,16 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
     required this.subStepsPerStep,
     this.onSubStepChanged,
     this.onNextValidation, // New validation callback
-  }) : super(const StepsFlowState(currentStep: 1, currentSubStep: 1));
+    int initialSubStep = 1, // <- default to 1
+  }) : super(
+         StepsFlowState(
+           currentStep: _determineStepFromInitial(
+             initialSubStep,
+             subStepsPerStep,
+           ),
+           currentSubStep: initialSubStep,
+         ),
+       );
 
   final int totalSubSteps;
   final List<int> subStepsPerStep;
@@ -54,5 +63,16 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
       }
     }
     return subStepsPerStep.length; // Fallback
+  }
+
+  static int _determineStepFromInitial(int subStep, List<int> subStepsPerStep) {
+    int cumulativeSubSteps = 0;
+    for (int i = 0; i < subStepsPerStep.length; i++) {
+      cumulativeSubSteps += subStepsPerStep[i];
+      if (subStep <= cumulativeSubSteps) {
+        return i + 1;
+      }
+    }
+    return subStepsPerStep.length;
   }
 }
