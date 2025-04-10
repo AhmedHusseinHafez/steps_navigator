@@ -62,6 +62,11 @@ class _StepsNavigatorState extends State<StepsNavigator> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: widget.initialPage ?? 0);
+
+    if (widget.initialPage != null) {
+      widget.onSubStepChanged?.call(widget.totalSteps, widget.initialPage!);
+    }
+
     // Validate inputs
     assert(widget.totalSteps == widget.subStepsPerStep.length);
     assert(
