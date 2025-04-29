@@ -21,6 +21,7 @@ class MyApp extends StatelessWidget {
       ),
       home: Scaffold(
         body: StepsNavigator(
+          rebuildWhenDidUpdate: false,
           onBackValidation: (currentStep, currentSubStep) async {
             debugPrint(
               "call onBackValidation for step $currentStep and substep $currentSubStep",

@@ -27,6 +27,7 @@ class StepsNavigator extends StatefulWidget {
     this.onNextValidation,
     this.onBackValidation,
     this.initialPage = 0,
+    this.rebuildWhenDidUpdate = false,
   });
   final PreferredSizeWidget? appBar;
   final List<Widget> screens;
@@ -54,6 +55,8 @@ class StepsNavigator extends StatefulWidget {
   final Future<bool> Function(int currentStep, int currentSubStep)?
   onBackValidation;
 
+  final bool rebuildWhenDidUpdate;
+
   @override
   State<StepsNavigator> createState() => _StepsNavigatorState();
 }
@@ -74,9 +77,21 @@ class _StepsNavigatorState extends State<StepsNavigator> {
     assert(widget.screens.length == widget.totalSubSteps);
   }
 
+  int _computeCubitKey() {
+    return Object.hash(
+      widget.totalSubSteps,
+      Object.hashAll(widget.subStepsPerStep),
+      widget.onSubStepChanged,
+      widget.onNextValidation,
+      widget.onBackValidation,
+      widget.initialPage,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
+      key: widget.rebuildWhenDidUpdate ? ValueKey(_computeCubitKey()) : null,
       create:
           (context) => StepsFlowCubit(
             totalSubSteps: widget.totalSubSteps,
