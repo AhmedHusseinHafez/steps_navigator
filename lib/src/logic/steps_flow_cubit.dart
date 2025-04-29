@@ -9,7 +9,8 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
     required this.totalSubSteps,
     required this.subStepsPerStep,
     this.onSubStepChanged,
-    this.onNextValidation, // New validation callback
+    this.onNextValidation,
+    this.onBackValidation,
     int initialSubStep = 1, // <- default to 1
   }) : super(
          StepsFlowState(
@@ -25,7 +26,8 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
   final List<int> subStepsPerStep;
   final void Function(int step, int subStep)? onSubStepChanged;
   final Future<bool> Function(int currentStep, int currentSubStep)?
-  onNextValidation; // Async validation
+  onNextValidation;
+  final Future<bool> Function(int step, int subStep)? onBackValidation;
 
   Future<void> onNextPressed() async {
     final currentStep = state.currentStep;
@@ -34,9 +36,7 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
     // Check if validation exists and run it
     if (onNextValidation != null) {
       final isValid = await onNextValidation!(currentStep, currentSubStep);
-      if (!isValid) {
-        return; // Don't proceed if validation fails
-      }
+      if (!isValid) return;
     }
 
     final newSubStep = (currentSubStep + 1).clamp(1, totalSubSteps);
@@ -46,8 +46,17 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
     onSubStepChanged?.call(newStep, newSubStep); // Trigger callback
   }
 
-  void onBackPressed() {
-    final newSubStep = (state.currentSubStep - 1).clamp(1, totalSubSteps);
+  void onBackPressed() async {
+    final currentStep = state.currentStep;
+    final currentSubStep = state.currentSubStep;
+    if (currentSubStep == 1) return;
+
+    if (onBackValidation != null) {
+      final isValid = await onBackValidation!(currentStep, currentSubStep);
+      if (!isValid) return;
+    }
+
+    final newSubStep = (currentSubStep - 1).clamp(1, totalSubSteps);
     final newStep = _determineStep(newSubStep);
 
     emit(StepsFlowState(currentStep: newStep, currentSubStep: newSubStep));

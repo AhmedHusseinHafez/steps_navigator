@@ -25,6 +25,7 @@ class StepsNavigator extends StatefulWidget {
     required this.subStepsPerStep,
     this.onSubStepChanged,
     this.onNextValidation,
+    this.onBackValidation,
     this.initialPage = 0,
   });
   final PreferredSizeWidget? appBar;
@@ -49,7 +50,9 @@ class StepsNavigator extends StatefulWidget {
   final List<int> subStepsPerStep;
   final void Function(int step, int subStep)? onSubStepChanged;
   final Future<bool> Function(int currentStep, int currentSubStep)?
-  onNextValidation; // New parameter
+  onNextValidation;
+  final Future<bool> Function(int currentStep, int currentSubStep)?
+  onBackValidation;
 
   @override
   State<StepsNavigator> createState() => _StepsNavigatorState();
@@ -80,6 +83,7 @@ class _StepsNavigatorState extends State<StepsNavigator> {
             subStepsPerStep: widget.subStepsPerStep,
             onSubStepChanged: widget.onSubStepChanged,
             onNextValidation: widget.onNextValidation,
+            onBackValidation: widget.onBackValidation,
             initialSubStep: (widget.initialPage ?? 0) + 1,
           ),
       child: Scaffold(

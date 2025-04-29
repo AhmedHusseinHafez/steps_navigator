@@ -21,14 +21,20 @@ class MyApp extends StatelessWidget {
       ),
       home: Scaffold(
         body: StepsNavigator(
+          onBackValidation: (currentStep, currentSubStep) async {
+            debugPrint(
+              "call onBackValidation for step $currentStep and substep $currentSubStep",
+            );
+            return true;
+          },
           onNextValidation: (currentStep, currentSubStep) async {
             // Example: Allow proceeding only if on the first sub step of step 1
             if (currentStep == 1 && currentSubStep == 1) {
               debugPrint("Validation passed");
               return true;
             }
-            debugPrint("Validation failed");
-            return false;
+            // debugPrint("Validation failed");
+            return true;
           },
           subStepsPerStep: subStepsPerStep,
 
