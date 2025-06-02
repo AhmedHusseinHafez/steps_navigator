@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:steps_navigator/src/widgets/step_progress_with_spacing.dart';
+import 'package:steps_navigator/src/logic/steps_flow_cubit.dart';
+import 'package:steps_navigator/src/logic/navigation_direction.dart';
 
 class StepsNavBar extends StatelessWidget {
   const StepsNavBar({
     super.key,
-    required this.totalSteps,
     required this.currentSubStep,
     required this.currentStep,
     required this.onBackPressed,
     required this.onNextPressed,
     required this.subStepsPerStep,
+    required this.state,
     this.padding,
     this.customBackButton,
     this.customNextButton,
@@ -22,10 +24,10 @@ class StepsNavBar extends StatelessWidget {
     this.spaceBetweenButtonAndSteps,
   });
 
-  final int totalSteps;
   final int currentSubStep;
   final int currentStep;
   final List<int> subStepsPerStep;
+  final StepsFlowState state;
   final EdgeInsetsGeometry? padding;
   final Widget? customBackButton;
   final Widget? customNextButton;
@@ -46,7 +48,7 @@ class StepsNavBar extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         StepProgressWithSpacing(
-          totalSteps: totalSteps,
+          totalSteps: subStepsPerStep.length,
           currentStep: _calculateCurrentStepFactor(),
           stepHeight: stepHeight ?? 5,
           spacing: spacing ?? 6,
@@ -59,86 +61,190 @@ class StepsNavBar extends StatelessWidget {
           padding: padding ?? EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [_buildBackButton(), _buildNextButton()],
+            children: [_buildBackButton(context), _buildNextButton(context)],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildBackButton() {
-    if (customBackButton == null) {
-      return TextButton(
-        onPressed: onBackPressed,
-        child: Text(
-          "Back",
-          style: const TextStyle(decoration: TextDecoration.underline),
-        ),
-      );
+  Widget _buildBackButton(BuildContext context) {
+    final isLoading =
+        state.isLoading &&
+        state.loadingDirection == NavigationDirection.backward;
+    final onPressed =
+        (!state.isBackEnabled || isLoading) ? null : onBackPressed;
+
+    if (customBackButton != null) {
+      if (customBackButton is TextButton) {
+        final button = customBackButton as TextButton;
+        return TextButton(
+          onPressed: onPressed,
+          style: button.style,
+          child:
+              isLoading
+                  ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).colorScheme.onPrimary,
+                      ),
+                    ),
+                  )
+                  : button.child ?? const SizedBox(),
+        );
+      } else if (customBackButton is ElevatedButton) {
+        final button = customBackButton as ElevatedButton;
+        return ElevatedButton(
+          onPressed: onPressed,
+          style: button.style,
+          child:
+              isLoading
+                  ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).colorScheme.onPrimary,
+                      ),
+                    ),
+                  )
+                  : button.child ?? const SizedBox(),
+        );
+      } else if (customBackButton is IconButton) {
+        final button = customBackButton as IconButton;
+        return IconButton(
+          onPressed: onPressed,
+          icon:
+              isLoading
+                  ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).colorScheme.onPrimary,
+                      ),
+                    ),
+                  )
+                  : button.icon,
+          color: button.color,
+          iconSize: button.iconSize,
+        );
+      }
+      return customBackButton!;
     }
 
-    return _wrapButtonWithCallback(
-      button: customBackButton!,
-      requiredCallback: onBackPressed,
+    return TextButton(
+      onPressed: onPressed,
+      child:
+          isLoading
+              ? SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
+              )
+              : Text(
+                "Back",
+                style: const TextStyle(decoration: TextDecoration.underline),
+              ),
     );
   }
 
-  Widget _buildNextButton() {
-    if (customNextButton == null) {
-      return ElevatedButton(onPressed: onNextPressed, child: Text("Next"));
+  Widget _buildNextButton(BuildContext context) {
+    final isLoading =
+        state.isLoading &&
+        state.loadingDirection == NavigationDirection.forward;
+    final onPressed =
+        (!state.isNextEnabled || isLoading) ? null : onNextPressed;
+
+    if (customNextButton != null) {
+      if (customNextButton is TextButton) {
+        final button = customNextButton as TextButton;
+        return TextButton(
+          onPressed: onPressed,
+          style: button.style,
+          child:
+              isLoading
+                  ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).colorScheme.onPrimary,
+                      ),
+                    ),
+                  )
+                  : button.child ?? const SizedBox(),
+        );
+      } else if (customNextButton is ElevatedButton) {
+        final button = customNextButton as ElevatedButton;
+        return ElevatedButton(
+          onPressed: onPressed,
+          style: button.style,
+          child:
+              isLoading
+                  ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).colorScheme.onPrimary,
+                      ),
+                    ),
+                  )
+                  : button.child ?? const SizedBox(),
+        );
+      } else if (customNextButton is IconButton) {
+        final button = customNextButton as IconButton;
+        return IconButton(
+          onPressed: onPressed,
+          icon:
+              isLoading
+                  ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).colorScheme.onPrimary,
+                      ),
+                    ),
+                  )
+                  : button.icon,
+          color: button.color,
+          iconSize: button.iconSize,
+        );
+      }
+      return customNextButton!;
     }
 
-    return _wrapButtonWithCallback(
-      button: customNextButton!,
-      requiredCallback: onNextPressed,
+    return ElevatedButton(
+      onPressed: onPressed,
+      child:
+          isLoading
+              ? SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
+              )
+              : Text("Next"),
     );
-  }
-
-  Widget _wrapButtonWithCallback({
-    required Widget button,
-    required VoidCallback requiredCallback,
-  }) {
-    VoidCallback? customCallback;
-
-    // Try to extract the onPressed callback from common button types
-    if (button is ElevatedButton) {
-      customCallback = button.onPressed;
-    } else if (button is TextButton) {
-      customCallback = button.onPressed;
-    } else if (button is IconButton) {
-      customCallback = button.onPressed;
-    }
-
-    // Combine the callbacks: customCallback (if exists) + requiredCallback
-    combinedCallback() {
-      customCallback?.call(); // Call the custom callback if it exists
-      requiredCallback(); // Always call the required navigation callback
-    }
-
-    // Return a new button with the combined callback
-    if (button is ElevatedButton) {
-      return ElevatedButton(
-        onPressed: combinedCallback,
-        style: button.style,
-        child: button.child,
-      );
-    } else if (button is TextButton) {
-      return TextButton(
-        onPressed: combinedCallback,
-        style: button.style,
-        child: button,
-      );
-    } else if (button is IconButton) {
-      return IconButton(
-        onPressed: combinedCallback,
-        icon: button.icon,
-        color: button.color,
-        iconSize: button.iconSize,
-      );
-    }
-
-    // Fallback: Wrap unknown widget types with GestureDetector
-    return GestureDetector(onTap: combinedCallback, child: button);
   }
 
   double _calculateCurrentStepFactor() {

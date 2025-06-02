@@ -1,87 +1,111 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'navigation_direction.dart';
 
 part 'steps_flow_cubit.freezed.dart';
 part 'steps_flow_state.dart';
 
 class StepsFlowCubit extends Cubit<StepsFlowState> {
   StepsFlowCubit({
-    required this.totalSubSteps,
-    required this.subStepsPerStep,
+    required this.subStepsPerStepPattern,
     this.onSubStepChanged,
-    this.onNextValidation,
-    this.onBackValidation,
+    this.onValidate,
     int initialSubStep = 1, // <- default to 1
   }) : super(
          StepsFlowState(
-           currentStep: _determineStepFromInitial(
-             initialSubStep,
-             subStepsPerStep,
-           ),
+           currentStep: _determineStep(initialSubStep, subStepsPerStepPattern),
            currentSubStep: initialSubStep,
          ),
        );
 
-  final int totalSubSteps;
-  final List<int> subStepsPerStep;
+  final List<int> subStepsPerStepPattern;
   final void Function(int step, int subStep)? onSubStepChanged;
-  final Future<bool> Function(int currentStep, int currentSubStep)?
-  onNextValidation;
-  final Future<bool> Function(int step, int subStep)? onBackValidation;
+  final Future<bool> Function(
+    NavigationDirection direction,
+    int step,
+    int subStep,
+  )?
+  onValidate;
 
-  Future<void> onNextPressed() async {
+  Future<void> onProcess(
+    NavigationDirection direction,
+    int step,
+    int subStep,
+  ) async {
     final currentStep = state.currentStep;
     final currentSubStep = state.currentSubStep;
+    final totalSubSteps = subStepsPerStepPattern.fold<int>(
+      0,
+      (sum, count) => sum + count,
+    );
+    final incrementNewSubStep = (currentSubStep + 1).clamp(1, totalSubSteps);
+    final decrementNewSubStep = (currentSubStep - 1).clamp(1, totalSubSteps);
+    final newNextStep = _determineStep(
+      incrementNewSubStep,
+      subStepsPerStepPattern,
+    );
+    final newBackStep = _determineStep(
+      decrementNewSubStep,
+      subStepsPerStepPattern,
+    );
 
-    // Check if validation exists and run it
-    if (onNextValidation != null) {
-      final isValid = await onNextValidation!(currentStep, currentSubStep);
-      if (!isValid) return;
+    if (direction == NavigationDirection.forward) {
+      if (onValidate != null) {
+        emit(state.copyWith(isLoading: true, loadingDirection: direction));
+        final isValid = await onValidate!(
+          direction,
+          currentStep,
+          currentSubStep,
+        );
+        emit(state.copyWith(isLoading: false, loadingDirection: null));
+        if (!isValid) return;
+      }
+      onSubStepChanged?.call(currentStep, incrementNewSubStep);
+      emit(
+        StepsFlowState(
+          currentStep: newNextStep,
+          currentSubStep: incrementNewSubStep,
+        ),
+      );
+    } else if (direction == NavigationDirection.backward) {
+      if (onValidate != null) {
+        emit(state.copyWith(isLoading: true, loadingDirection: direction));
+        final isValid = await onValidate!(
+          direction,
+          currentStep,
+          currentSubStep,
+        );
+        emit(state.copyWith(isLoading: false, loadingDirection: null));
+        if (!isValid) return;
+      }
+      onSubStepChanged?.call(currentStep, decrementNewSubStep);
+      emit(
+        StepsFlowState(
+          currentStep: newBackStep,
+          currentSubStep: decrementNewSubStep,
+        ),
+      );
     }
-
-    final newSubStep = (currentSubStep + 1).clamp(1, totalSubSteps);
-    final newStep = _determineStep(newSubStep);
-
-    emit(StepsFlowState(currentStep: newStep, currentSubStep: newSubStep));
-    onSubStepChanged?.call(newStep, newSubStep); // Trigger callback
   }
 
-  void onBackPressed() async {
-    final currentStep = state.currentStep;
-    final currentSubStep = state.currentSubStep;
-    if (currentSubStep == 1) return;
-
-    if (onBackValidation != null) {
-      final isValid = await onBackValidation!(currentStep, currentSubStep);
-      if (!isValid) return;
-    }
-
-    final newSubStep = (currentSubStep - 1).clamp(1, totalSubSteps);
-    final newStep = _determineStep(newSubStep);
-
-    emit(StepsFlowState(currentStep: newStep, currentSubStep: newSubStep));
-    onSubStepChanged?.call(newStep, newSubStep);
-  }
-
-  int _determineStep(int subStep) {
+  static int _determineStep(int subStep, List<int> subStepsPerStepPattern) {
     int cumulativeSubSteps = 0;
-    for (int i = 0; i < subStepsPerStep.length; i++) {
-      cumulativeSubSteps += subStepsPerStep[i];
+    for (int i = 0; i < subStepsPerStepPattern.length; i++) {
+      cumulativeSubSteps += subStepsPerStepPattern[i];
       if (subStep <= cumulativeSubSteps) {
         return i + 1;
       }
     }
-    return subStepsPerStep.length; // Fallback
+    return subStepsPerStepPattern.length; // Fallback
   }
 
-  static int _determineStepFromInitial(int subStep, List<int> subStepsPerStep) {
-    int cumulativeSubSteps = 0;
-    for (int i = 0; i < subStepsPerStep.length; i++) {
-      cumulativeSubSteps += subStepsPerStep[i];
-      if (subStep <= cumulativeSubSteps) {
-        return i + 1;
-      }
-    }
-    return subStepsPerStep.length;
+  void updateButtonStates({
+    bool? isNextEnabled,
+    bool? isBackEnabled,
+  }) {
+    emit(state.copyWith(
+      isNextEnabled: isNextEnabled ?? state.isNextEnabled,
+      isBackEnabled: isBackEnabled ?? state.isBackEnabled,
+    ));
   }
 }

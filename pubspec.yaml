@@ -28,6 +28,9 @@ dependencies:
   # For Gen Models
   freezed_annotation: ^3.0.0
 
+  # For Animations
+  flutter_animate: ^4.5.0
+
 dev_dependencies:
   bloc_test: ^10.0.0
   flutter_test:

@@ -5,15 +5,20 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool _isNextEnabled = true;
+  bool _isBackEnabled = true;
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    const totalSteps = 4;
-    const subStepsPerStep = [3, 4, 2, 5]; // Custom substeps for each step
-    final totalSubSteps = subStepsPerStep.reduce((a, b) => a + b);
+    final subStepsPerStepPattern = [4, 5, 6];
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -21,24 +26,16 @@ class MyApp extends StatelessWidget {
       ),
       home: Scaffold(
         body: StepsNavigator(
-          rebuildWhenDidUpdate: false,
-          onBackValidation: (currentStep, currentSubStep) async {
-            debugPrint(
-              "call onBackValidation for step $currentStep and substep $currentSubStep",
-            );
-            return true;
-          },
-          onNextValidation: (currentStep, currentSubStep) async {
-            // Example: Allow proceeding only if on the first sub step of step 1
-            if (currentStep == 1 && currentSubStep == 1) {
-              debugPrint("Validation passed");
+          onValidate: (direction, step, subStep) async {
+            // Simulate network delay
+            await Future.delayed(const Duration(seconds: 2));
+            if (direction == NavigationDirection.forward) {
               return true;
             }
-            // debugPrint("Validation failed");
             return true;
           },
-          subStepsPerStep: subStepsPerStep,
-
+          initialPage: 0,
+          subStepsPerStepPattern: subStepsPerStepPattern,
           padding: EdgeInsets.symmetric(horizontal: 15),
           progressColor: Colors.green,
           stepColor: Colors.lime,
@@ -47,33 +44,60 @@ class MyApp extends StatelessWidget {
           onSubStepChanged: (step, subStep) {
             debugPrint('Current Step: $step, Current SubStep: $subStep');
           },
-          customNextButton: IconButton(
+          customBackButton: TextButton.icon(
+            onPressed: null, // The actual navigation is handled internally
+            icon: Icon(Icons.arrow_back),
+            label: Text('Go Back'),
+          ),
+          customNextButton: ElevatedButton.icon(
+            onPressed: null, // The actual navigation is handled internally
             icon: Icon(Icons.arrow_forward),
-            onPressed: () {
-              debugPrint('Next button pressed');
+            label: Text('Continue'),
+          ),
+          appBar: AppBar(title: const Text("Steps Navigator")),
+          screens: List.generate(
+            subStepsPerStepPattern.fold<int>(0, (sum, count) => sum + count),
+            (index) => (state, updateButtonStates) {
+              // Example: Disable next button on even steps, disable back button on first step
+              updateButtonStates(isNextEnabled: _isNextEnabled, isBackEnabled: _isBackEnabled);
+
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                       Text("Next button: $_isNextEnabled"),
+                    Switch(value: _isNextEnabled, onChanged: (value) {
+                      setState(() {
+                        _isNextEnabled = value;
+                      });
+                    }),
+                    Text("Back button: $_isBackEnabled"),
+                    Switch(value: _isBackEnabled, onChanged: (value) {
+                      setState(() {
+                        _isBackEnabled = value;
+                      });
+                    }),
+                    Text(
+                      "current step: ${state.currentStep} current sub step: ${state.currentSubStep}",
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      "Next button is ${state.isNextEnabled ? 'enabled' : 'disabled'}",
+                      style: TextStyle(
+                        color: state.isNextEnabled ? Colors.green : Colors.red,
+                      ),
+                    ),
+                    Text(
+                      "Back button is ${state.isBackEnabled ? 'enabled' : 'disabled'}",
+                      style: TextStyle(
+                        color: state.isBackEnabled ? Colors.green : Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+              );
             },
           ),
-
-          appBar: AppBar(title: const Text("Steps Navigator")),
-          totalSubSteps: totalSubSteps,
-          screens: [
-            const Center(child: Text("Step 1")),
-            const Center(child: Text("Step 2")),
-            const Center(child: Text("Step 3")),
-            const Center(child: Text("Step 4")),
-            const Center(child: Text("Step 5")),
-            const Center(child: Text("Step 6")),
-            const Center(child: Text("Step 7")),
-
-            const Center(child: Text("Step 8")),
-            const Center(child: Text("Step 9")),
-            const Center(child: Text("Step 10")),
-            const Center(child: Text("Step 11")),
-            const Center(child: Text("Step 12")),
-            const Center(child: Text("Step 13")),
-            const Center(child: Text("Step 14")),
-          ],
-          totalSteps: totalSteps,
         ),
       ),
     );

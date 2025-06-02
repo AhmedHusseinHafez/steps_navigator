@@ -1,9 +1,13 @@
 part of 'steps_flow_cubit.dart';
 
 @freezed
-sealed class StepsFlowState with _$StepsFlowState {
+abstract class StepsFlowState with _$StepsFlowState {
   const factory StepsFlowState({
     required int currentStep,
     required int currentSubStep,
+    @Default(false) bool isLoading,
+    NavigationDirection? loadingDirection,
+    @Default(true) bool isNextEnabled,
+    @Default(true) bool isBackEnabled,
   }) = _StepsFlowState;
 }

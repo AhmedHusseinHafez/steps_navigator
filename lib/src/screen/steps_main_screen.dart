@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:steps_navigator/src/helper/steps_navigator_validator.dart';
 import 'package:steps_navigator/src/logic/steps_flow_cubit.dart';
 import 'package:steps_navigator/src/widgets/steps_nav_bar.dart';
+import 'package:steps_navigator/steps_navigator.dart';
 
 class StepsNavigator extends StatefulWidget {
-  const StepsNavigator({
+  StepsNavigator({
     super.key,
     this.appBar,
     required this.screens,
-    required this.totalSteps,
-    required this.totalSubSteps,
     this.stepColor,
     this.progressColor,
     this.progressCurve,
@@ -22,17 +22,29 @@ class StepsNavigator extends StatefulWidget {
     this.spaceBetweenButtonAndSteps,
     this.pageAnimationDuration,
     this.pageAnimationCurve,
-    required this.subStepsPerStep,
+    required this.subStepsPerStepPattern,
     this.onSubStepChanged,
-    this.onNextValidation,
-    this.onBackValidation,
+    this.onValidate,
     this.initialPage = 0,
-    this.rebuildWhenDidUpdate = false,
-  });
+  }) {
+    StepsNavigatorValidator.validate(
+      screens: screens,
+      // totalSteps: totalSteps,
+      subStepsPerStepPattern: subStepsPerStepPattern,
+      initialPage: initialPage ?? 0,
+    );
+  }
   final PreferredSizeWidget? appBar;
-  final List<Widget> screens;
-  final int totalSteps;
-  final int totalSubSteps;
+
+  final List<
+    Widget Function(
+      StepsFlowState state,
+      void Function({bool? isNextEnabled, bool? isBackEnabled})
+      updateButtonStates,
+    )
+  >
+  screens;
+  // final int totalSteps;
 
   final Color? stepColor;
   final Color? progressColor;
@@ -48,14 +60,14 @@ class StepsNavigator extends StatefulWidget {
   final Curve? pageAnimationCurve;
   final int? initialPage;
 
-  final List<int> subStepsPerStep;
+  final List<int> subStepsPerStepPattern;
   final void Function(int step, int subStep)? onSubStepChanged;
-  final Future<bool> Function(int currentStep, int currentSubStep)?
-  onNextValidation;
-  final Future<bool> Function(int currentStep, int currentSubStep)?
-  onBackValidation;
-
-  final bool rebuildWhenDidUpdate;
+  final Future<bool> Function(
+    NavigationDirection direction,
+    int step,
+    int subStep,
+  )?
+  onValidate;
 
   @override
   State<StepsNavigator> createState() => _StepsNavigatorState();
@@ -68,37 +80,16 @@ class _StepsNavigatorState extends State<StepsNavigator> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: widget.initialPage ?? 0);
-
-    // Validate inputs
-    assert(widget.totalSteps == widget.subStepsPerStep.length);
-    assert(
-      widget.totalSubSteps == widget.subStepsPerStep.reduce((a, b) => a + b),
-    );
-    assert(widget.screens.length == widget.totalSubSteps);
-  }
-
-  int _computeCubitKey() {
-    return Object.hash(
-      widget.totalSubSteps,
-      Object.hashAll(widget.subStepsPerStep),
-      widget.onSubStepChanged,
-      widget.onNextValidation,
-      widget.onBackValidation,
-      widget.initialPage,
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      key: widget.rebuildWhenDidUpdate ? ValueKey(_computeCubitKey()) : null,
       create:
           (context) => StepsFlowCubit(
-            totalSubSteps: widget.totalSubSteps,
-            subStepsPerStep: widget.subStepsPerStep,
+            subStepsPerStepPattern: widget.subStepsPerStepPattern,
             onSubStepChanged: widget.onSubStepChanged,
-            onNextValidation: widget.onNextValidation,
-            onBackValidation: widget.onBackValidation,
+            onValidate: widget.onValidate,
             initialSubStep: (widget.initialPage ?? 0) + 1,
           ),
       child: Scaffold(
@@ -115,7 +106,7 @@ class _StepsNavigatorState extends State<StepsNavigator> {
   }
 
   Widget _bodyBloc() {
-    return BlocListener<StepsFlowCubit, StepsFlowState>(
+    return BlocConsumer<StepsFlowCubit, StepsFlowState>(
       listenWhen:
           (previous, current) =>
               previous.currentSubStep != current.currentSubStep,
@@ -130,18 +121,23 @@ class _StepsNavigatorState extends State<StepsNavigator> {
           );
         }
       },
-      child: _body(context),
+      builder: _body,
     );
   }
 
-  Widget _body(BuildContext context) {
+  Widget _body(BuildContext context, StepsFlowState state) {
     return PageView.builder(
       physics: const NeverScrollableScrollPhysics(),
       controller: _pageController,
 
       itemCount: widget.screens.length,
       itemBuilder: (context, index) {
-        return widget.screens[index];
+        return widget.screens[index](state, ({isNextEnabled, isBackEnabled}) {
+          context.read<StepsFlowCubit>().updateButtonStates(
+            isNextEnabled: isNextEnabled,
+            isBackEnabled: isBackEnabled,
+          );
+        });
       },
     );
   }
@@ -151,13 +147,22 @@ class _StepsNavigatorState extends State<StepsNavigator> {
       builder: (context, state) {
         final cubit = context.read<StepsFlowCubit>();
         return StepsNavBar(
-          subStepsPerStep: widget.subStepsPerStep,
-          totalSteps: widget.totalSteps,
+          subStepsPerStep: widget.subStepsPerStepPattern,
           currentStep: state.currentStep,
           currentSubStep: state.currentSubStep,
-          onBackPressed: cubit.onBackPressed,
-          onNextPressed: cubit.onNextPressed,
-
+          state: state,
+          onBackPressed:
+              () => cubit.onProcess(
+                NavigationDirection.backward,
+                state.currentStep,
+                state.currentSubStep,
+              ),
+          onNextPressed:
+              () => cubit.onProcess(
+                NavigationDirection.forward,
+                state.currentStep,
+                state.currentSubStep,
+              ),
           customBackButton: widget.customBackButton,
           customNextButton: widget.customNextButton,
           padding: widget.padding,
