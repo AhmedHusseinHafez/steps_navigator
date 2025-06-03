@@ -10,7 +10,11 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
     required this.subStepsPerStepPattern,
     this.onSubStepChanged,
     this.onValidate,
-    int initialSubStep = 1, // <- default to 1
+    this.onScreenEnter,
+    this.onScreenExit,
+    this.onStepComplete,
+    this.onFlowComplete,
+    int initialSubStep = 1,
   }) : super(
          StepsFlowState(
            currentStep: _determineStep(initialSubStep, subStepsPerStepPattern),
@@ -26,6 +30,19 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
     int subStep,
   )?
   onValidate;
+  final Future<void> Function(
+    NavigationDirection direction,
+    int step,
+    int subStep,
+  )?
+  onScreenEnter;
+  final Future<void> Function(
+    NavigationDirection direction,
+    int step,
+    int subStep,
+  )? onScreenExit;
+  final Future<void> Function(int step)? onStepComplete;
+  final Future<void> Function()? onFlowComplete;
 
   Future<void> onProcess(
     NavigationDirection direction,
@@ -60,6 +77,11 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
         emit(state.copyWith(isLoading: false, loadingDirection: null));
         if (!isValid) return;
       }
+
+      if (onScreenExit != null) {
+        await onScreenExit!(direction, currentStep, currentSubStep);
+      }
+
       onSubStepChanged?.call(currentStep, incrementNewSubStep);
       emit(
         StepsFlowState(
@@ -67,6 +89,16 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
           currentSubStep: incrementNewSubStep,
         ),
       );
+
+      if (currentStep != newNextStep && onStepComplete != null) {
+        await onStepComplete!(currentStep);
+      }
+
+      if (incrementNewSubStep == totalSubSteps && onFlowComplete != null) {
+        await onFlowComplete!();
+      }
+
+      await onScreenEnterProcess(newNextStep, incrementNewSubStep);
     } else if (direction == NavigationDirection.backward) {
       if (onValidate != null) {
         emit(state.copyWith(isLoading: true, loadingDirection: direction));
@@ -78,6 +110,11 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
         emit(state.copyWith(isLoading: false, loadingDirection: null));
         if (!isValid) return;
       }
+
+      if (onScreenExit != null) {
+        await onScreenExit!(direction, currentStep, currentSubStep);
+      }
+
       onSubStepChanged?.call(currentStep, decrementNewSubStep);
       emit(
         StepsFlowState(
@@ -85,6 +122,8 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
           currentSubStep: decrementNewSubStep,
         ),
       );
+
+      await onScreenEnterProcess(newBackStep, decrementNewSubStep);
     }
   }
 
@@ -99,13 +138,22 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
     return subStepsPerStepPattern.length; // Fallback
   }
 
-  void updateButtonStates({
-    bool? isNextEnabled,
-    bool? isBackEnabled,
-  }) {
-    emit(state.copyWith(
-      isNextEnabled: isNextEnabled ?? state.isNextEnabled,
-      isBackEnabled: isBackEnabled ?? state.isBackEnabled,
-    ));
+  void updateButtonStates({bool? isNextEnabled, bool? isBackEnabled}) {
+    emit(
+      state.copyWith(
+        isNextEnabled: isNextEnabled ?? state.isNextEnabled,
+        isBackEnabled: isBackEnabled ?? state.isBackEnabled,
+      ),
+    );
+  }
+
+  Future<void> onScreenEnterProcess(int stepIndex, int subStepIndex) async {
+    if (onScreenEnter != null) {
+      await onScreenEnter!(
+        state.loadingDirection ?? NavigationDirection.forward,
+        stepIndex,
+        subStepIndex,
+      );
+    }
   }
 }

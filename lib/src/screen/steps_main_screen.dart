@@ -25,6 +25,10 @@ class StepsNavigator extends StatefulWidget {
     required this.subStepsPerStepPattern,
     this.onSubStepChanged,
     this.onValidate,
+    this.onScreenEnter,
+    this.onScreenExit,
+    this.onStepComplete,
+    this.onFlowComplete,
     this.initialPage = 0,
   }) {
     StepsNavigatorValidator.validate(
@@ -68,7 +72,18 @@ class StepsNavigator extends StatefulWidget {
     int subStep,
   )?
   onValidate;
-
+  final Future<void> Function(
+    NavigationDirection direction,
+    int step,
+    int subStep,
+  )? onScreenEnter;
+  final Future<void> Function(
+    NavigationDirection direction,
+    int step,
+    int subStep,
+  )? onScreenExit;
+  final Future<void> Function(int step)? onStepComplete;
+  final Future<void> Function()? onFlowComplete;
   @override
   State<StepsNavigator> createState() => _StepsNavigatorState();
 }
@@ -87,6 +102,10 @@ class _StepsNavigatorState extends State<StepsNavigator> {
     return BlocProvider(
       create:
           (context) => StepsFlowCubit(
+            onScreenEnter: widget.onScreenEnter,
+            onScreenExit: widget.onScreenExit,
+            onStepComplete: widget.onStepComplete,
+            onFlowComplete: widget.onFlowComplete,
             subStepsPerStepPattern: widget.subStepsPerStepPattern,
             onSubStepChanged: widget.onSubStepChanged,
             onValidate: widget.onValidate,

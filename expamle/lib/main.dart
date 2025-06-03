@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:steps_navigator/steps_navigator.dart';
 
@@ -28,19 +30,32 @@ class _MyAppState extends State<MyApp> {
         body: StepsNavigator(
           onValidate: (direction, step, subStep) async {
             // Simulate network delay
-            await Future.delayed(const Duration(seconds: 2));
+            await Future.delayed(const Duration(milliseconds: 300));
             if (direction == NavigationDirection.forward) {
               return true;
             }
             return true;
           },
           initialPage: 0,
+          onScreenExit: (direction, step, subStep) async {
+            log('onScreenExit: $direction, $step, $subStep');
+          },
+          onStepComplete: (step) async {
+            log('onStepComplete: $step');
+          },
+          onFlowComplete: () async {
+            log('Flow completed!');
+          },
+          onScreenEnter: (direction, step, subStep) async {
+            log('onScreenEnter: $direction, $step, $subStep');
+          },
           subStepsPerStepPattern: subStepsPerStepPattern,
           padding: EdgeInsets.symmetric(horizontal: 15),
           progressColor: Colors.green,
           stepColor: Colors.lime,
           spacing: 8,
           stepHeight: 9,
+
           onSubStepChanged: (step, subStep) {
             debugPrint('Current Step: $step, Current SubStep: $subStep');
           },
@@ -59,24 +74,33 @@ class _MyAppState extends State<MyApp> {
             subStepsPerStepPattern.fold<int>(0, (sum, count) => sum + count),
             (index) => (state, updateButtonStates) {
               // Example: Disable next button on even steps, disable back button on first step
-              updateButtonStates(isNextEnabled: _isNextEnabled, isBackEnabled: _isBackEnabled);
+              updateButtonStates(
+                isNextEnabled: _isNextEnabled,
+                isBackEnabled: _isBackEnabled,
+              );
 
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                       Text("Next button: $_isNextEnabled"),
-                    Switch(value: _isNextEnabled, onChanged: (value) {
-                      setState(() {
-                        _isNextEnabled = value;
-                      });
-                    }),
+                    Text("Next button: $_isNextEnabled"),
+                    Switch(
+                      value: _isNextEnabled,
+                      onChanged: (value) {
+                        setState(() {
+                          _isNextEnabled = value;
+                        });
+                      },
+                    ),
                     Text("Back button: $_isBackEnabled"),
-                    Switch(value: _isBackEnabled, onChanged: (value) {
-                      setState(() {
-                        _isBackEnabled = value;
-                      });
-                    }),
+                    Switch(
+                      value: _isBackEnabled,
+                      onChanged: (value) {
+                        setState(() {
+                          _isBackEnabled = value;
+                        });
+                      },
+                    ),
                     Text(
                       "current step: ${state.currentStep} current sub step: ${state.currentSubStep}",
                     ),
