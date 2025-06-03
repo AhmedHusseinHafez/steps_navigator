@@ -33,6 +33,7 @@ class StepsNavigator extends StatelessWidget {
     this.initialPage = 0,
     this.debounceDuration,
     this.stepConfigurations = const {},
+    this.navHeight,
   }) {
     StepsNavigatorValidator.validate(
       screens: screens,
@@ -43,7 +44,14 @@ class StepsNavigator extends StatelessWidget {
   }
 
   final PreferredSizeWidget? appBar;
-  final List<Widget Function(StepsFlowState state, void Function({bool? isNextEnabled, bool? isBackEnabled}) updateButtonStates)> screens;
+  final List<
+    Widget Function(
+      StepsFlowState state,
+      void Function({bool? isNextEnabled, bool? isBackEnabled})
+      updateButtonStates,
+    )
+  >
+  screens;
   final Color? stepColor;
   final Color? progressColor;
   final Curve? progressCurve;
@@ -60,27 +68,44 @@ class StepsNavigator extends StatelessWidget {
   final Duration? debounceDuration;
   final List<int> subStepsPerStepPattern;
   final void Function(int step, int subStep)? onSubStepChanged;
-  final Future<bool> Function(NavigationDirection direction, int step, int subStep)? onValidate;
-  final Future<void> Function(NavigationDirection direction, int step, int subStep)? onScreenEnter;
-  final Future<void> Function(NavigationDirection direction, int step, int subStep)? onScreenExit;
+  final Future<bool> Function(
+    NavigationDirection direction,
+    int step,
+    int subStep,
+  )?
+  onValidate;
+  final Future<void> Function(
+    NavigationDirection direction,
+    int step,
+    int subStep,
+  )?
+  onScreenEnter;
+  final Future<void> Function(
+    NavigationDirection direction,
+    int step,
+    int subStep,
+  )?
+  onScreenExit;
   final Future<void> Function(int step)? onStepComplete;
   final Future<void> Function()? onFlowComplete;
   final Map<int, StepConfiguration> stepConfigurations;
+  final double? navHeight;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => StepsFlowCubit(
-        onScreenEnter: onScreenEnter,
-        onScreenExit: onScreenExit,
-        onStepComplete: onStepComplete,
-        onFlowComplete: onFlowComplete,
-        subStepsPerStepPattern: subStepsPerStepPattern,
-        onSubStepChanged: onSubStepChanged,
-        onValidate: onValidate,
-        initialSubStep: (initialPage ?? 0) + 1,
-        stepConfigurations: stepConfigurations,
-      ),
+      create:
+          (context) => StepsFlowCubit(
+            onScreenEnter: onScreenEnter,
+            onScreenExit: onScreenExit,
+            onStepComplete: onStepComplete,
+            onFlowComplete: onFlowComplete,
+            subStepsPerStepPattern: subStepsPerStepPattern,
+            onSubStepChanged: onSubStepChanged,
+            onValidate: onValidate,
+            initialSubStep: (initialPage ?? 0) + 1,
+            stepConfigurations: stepConfigurations,
+          ),
       child: _StepsNavigatorContent(
         appBar: appBar,
         screens: screens,
@@ -100,6 +125,7 @@ class StepsNavigator extends StatelessWidget {
         debounceDuration: debounceDuration,
         stepConfigurations: stepConfigurations,
         subStepsPerStepPattern: subStepsPerStepPattern,
+        navHeight: navHeight,
       ),
     );
   }
@@ -124,11 +150,19 @@ class _StepsNavigatorContent extends StatefulWidget {
     this.pageAnimationDuration,
     this.pageAnimationCurve,
     this.initialPage,
+    this.navHeight,
     this.debounceDuration,
   });
 
   final PreferredSizeWidget? appBar;
-  final List<Widget Function(StepsFlowState state, void Function({bool? isNextEnabled, bool? isBackEnabled}) updateButtonStates)> screens;
+  final List<
+    Widget Function(
+      StepsFlowState state,
+      void Function({bool? isNextEnabled, bool? isBackEnabled})
+      updateButtonStates,
+    )
+  >
+  screens;
   final Color? stepColor;
   final Color? progressColor;
   final Curve? progressCurve;
@@ -145,6 +179,7 @@ class _StepsNavigatorContent extends StatefulWidget {
   final Duration? debounceDuration;
   final List<int> subStepsPerStepPattern;
   final Map<int, StepConfiguration> stepConfigurations;
+  final double? navHeight;
 
   @override
   State<_StepsNavigatorContent> createState() => _StepsNavigatorContentState();
@@ -164,7 +199,9 @@ class _StepsNavigatorContentState extends State<_StepsNavigatorContent> {
   }
 
   void _setupDebounce() {
-    _navigationSubject.debounceTime(_debounceDuration).listen((direction) async {
+    _navigationSubject.debounceTime(_debounceDuration).listen((
+      direction,
+    ) async {
       if (!mounted) return;
       final cubit = context.read<StepsFlowCubit>();
       final state = cubit.state;
@@ -179,7 +216,7 @@ class _StepsNavigatorContentState extends State<_StepsNavigatorContent> {
       body: _bodyBloc(),
       bottomNavigationBar: SafeArea(
         child: SizedBox(
-          height: kBottomNavigationBarHeight * 1.33,
+          height: widget.navHeight ?? (kBottomNavigationBarHeight * 1.33),
           child: _buildStepsNavBar(),
         ),
       ),
@@ -188,12 +225,16 @@ class _StepsNavigatorContentState extends State<_StepsNavigatorContent> {
 
   Widget _bodyBloc() {
     return BlocConsumer<StepsFlowCubit, StepsFlowState>(
-      listenWhen: (previous, current) => previous.currentSubStep != current.currentSubStep,
+      listenWhen:
+          (previous, current) =>
+              previous.currentSubStep != current.currentSubStep,
       listener: (context, state) {
         if (_pageController.hasClients) {
           _pageController.animateToPage(
             state.currentSubStep - 1,
-            duration: widget.pageAnimationDuration ?? const Duration(milliseconds: 200),
+            duration:
+                widget.pageAnimationDuration ??
+                const Duration(milliseconds: 200),
             curve: widget.pageAnimationCurve ?? Curves.easeInOut,
           );
         }
@@ -224,27 +265,41 @@ class _StepsNavigatorContentState extends State<_StepsNavigatorContent> {
         final currentStep = state.currentStep;
         final currentSubStep = state.currentSubStep;
         final stepConfig = widget.stepConfigurations[currentStep];
-        final subStepConfig = stepConfig?.getSubStepConfiguration(currentSubStep);
+        final subStepConfig = stepConfig?.getSubStepConfiguration(
+          currentSubStep,
+        );
 
         return StepsNavBar(
           subStepsPerStep: widget.subStepsPerStepPattern,
           currentStep: state.currentStep,
           currentSubStep: state.currentSubStep,
           state: state,
-          onBackPressed: !(subStepConfig?.disableBackButton ?? stepConfig?.disableBackButton ?? false)
-              ? () async {
-                  _navigationSubject.add(NavigationDirection.backward);
-                  return;
-                }
-              : null,
-          onNextPressed: !(subStepConfig?.disableNextButton ?? stepConfig?.disableNextButton ?? false)
-              ? () async {
-                  _navigationSubject.add(NavigationDirection.forward);
-                  return;
-                }
-              : null,
-          customBackButton: subStepConfig?.customBackButton ?? stepConfig?.customBackButton ?? widget.customBackButton,
-          customNextButton: subStepConfig?.customNextButton ?? stepConfig?.customNextButton ?? widget.customNextButton,
+          onBackPressed:
+              !(subStepConfig?.disableBackButton ??
+                      stepConfig?.disableBackButton ??
+                      false)
+                  ? () async {
+                    _navigationSubject.add(NavigationDirection.backward);
+                    return;
+                  }
+                  : null,
+          onNextPressed:
+              !(subStepConfig?.disableNextButton ??
+                      stepConfig?.disableNextButton ??
+                      false)
+                  ? () async {
+                    _navigationSubject.add(NavigationDirection.forward);
+                    return;
+                  }
+                  : null,
+          customBackButton:
+              subStepConfig?.customBackButton ??
+              stepConfig?.customBackButton ??
+              widget.customBackButton,
+          customNextButton:
+              subStepConfig?.customNextButton ??
+              stepConfig?.customNextButton ??
+              widget.customNextButton,
           padding: widget.padding,
           progressColor: widget.progressColor,
           progressCurve: widget.progressCurve,
