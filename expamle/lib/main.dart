@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:steps_navigator/steps_navigator.dart';
 
 void main() {
+  // Bloc.observer = MyBlocObserver();
   runApp(const MyApp());
 }
 
@@ -37,12 +38,13 @@ class _MyAppState extends State<MyApp> {
             return true;
           },
           initialPage: 0,
+          debounceDuration: const Duration(seconds: 1),
 
           stepConfigurations: {
             1: StepConfiguration(
               subStepConfigurations: {
                 2: SubStepConfiguration(
-                  skipValidation: true,
+                  // skipValidation: true,
                   customBackButton: IconButton(
                     onPressed: () {},
                     icon: Icon(Icons.arrow_back, color: Colors.red),
@@ -50,21 +52,21 @@ class _MyAppState extends State<MyApp> {
                 ),
               },
 
-              customBackButton: IconButton(
-                onPressed: () {},
-                icon: Icon(Icons.arrow_back),
-              ),
-              customNextButton: IconButton(
-                onPressed: () {},
-                icon: Icon(Icons.arrow_forward),
-              ),
+              // customBackButton: IconButton(
+              //   onPressed: () {},
+              //   icon: Icon(Icons.arrow_back),
+              // ),
+              // customNextButton: IconButton(
+              //   onPressed: () {},
+              //   icon: Icon(Icons.arrow_forward),
+              // ),
               customEnter: (direction, step, subStep) async {
                 log('customEnter: $direction, $step, $subStep');
               },
               customExit: (direction, step, subStep) async {
                 log('customExit: $direction, $step, $subStep');
               },
-              skipValidation: false,
+              // skipValidation: false,
               // disableBackButton: false,
               // disableNextButton: false,
             ),
