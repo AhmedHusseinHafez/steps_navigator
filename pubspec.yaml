@@ -22,14 +22,9 @@ dependencies:
   cupertino_icons: ^1.0.8
   
   #For State Management
-  flutter_bloc: ^9.1.0
+  flutter_bloc: ^9.1.1
   bloc: ^9.0.0
 
-  # For Gen Models
-  freezed_annotation: ^3.0.0
-
-  # For Animations
-  flutter_animate: ^4.5.0
 
 dev_dependencies:
   bloc_test: ^10.0.0
@@ -40,7 +35,6 @@ dev_dependencies:
   # For Gen Models
   build_runner: ^2.4.15
   json_serializable: ^6.9.4
-  freezed: ^3.0.4
 
 flutter:
 

@@ -52,7 +52,7 @@ also onStepComplete, onExit, onFlowComplete
 Step-Level Configuration✅
 Allow passing per-step settings (e.g. some steps or sub-step skip validation, others have custom buttons).
 
-External Control API
+External Control API👎
 Add methods on the State or Controller object (if you convert to a controller-based pattern) to programmatically jump to a step, reset to start, or disable certain steps.
 
 7. Testing & Documentation

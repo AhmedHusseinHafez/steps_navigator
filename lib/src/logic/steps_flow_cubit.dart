@@ -1,9 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'navigation_direction.dart';
 import 'step_configuration.dart';
 
-part 'steps_flow_cubit.freezed.dart';
 part 'steps_flow_state.dart';
 
 class StepsFlowCubit extends Cubit<StepsFlowState> {
