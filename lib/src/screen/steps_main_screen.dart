@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:steps_navigator/src/helper/steps_navigator_validator.dart';
 import 'package:steps_navigator/src/logic/steps_flow_cubit.dart';
+import 'package:steps_navigator/src/logic/step_configuration.dart';
 import 'package:steps_navigator/src/widgets/steps_nav_bar.dart';
 import 'package:steps_navigator/steps_navigator.dart';
 
@@ -30,12 +31,14 @@ class StepsNavigator extends StatefulWidget {
     this.onStepComplete,
     this.onFlowComplete,
     this.initialPage = 0,
+    this.stepConfigurations = const {},
   }) {
     StepsNavigatorValidator.validate(
       screens: screens,
       // totalSteps: totalSteps,
       subStepsPerStepPattern: subStepsPerStepPattern,
       initialPage: initialPage ?? 0,
+      stepConfigurations: stepConfigurations,
     );
   }
   final PreferredSizeWidget? appBar;
@@ -84,6 +87,10 @@ class StepsNavigator extends StatefulWidget {
   )? onScreenExit;
   final Future<void> Function(int step)? onStepComplete;
   final Future<void> Function()? onFlowComplete;
+
+  /// Configuration for individual steps
+  final Map<int, StepConfiguration> stepConfigurations;
+
   @override
   State<StepsNavigator> createState() => _StepsNavigatorState();
 }
@@ -100,17 +107,17 @@ class _StepsNavigatorState extends State<StepsNavigator> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create:
-          (context) => StepsFlowCubit(
-            onScreenEnter: widget.onScreenEnter,
-            onScreenExit: widget.onScreenExit,
-            onStepComplete: widget.onStepComplete,
-            onFlowComplete: widget.onFlowComplete,
-            subStepsPerStepPattern: widget.subStepsPerStepPattern,
-            onSubStepChanged: widget.onSubStepChanged,
-            onValidate: widget.onValidate,
-            initialSubStep: (widget.initialPage ?? 0) + 1,
-          ),
+      create: (context) => StepsFlowCubit(
+        onScreenEnter: widget.onScreenEnter,
+        onScreenExit: widget.onScreenExit,
+        onStepComplete: widget.onStepComplete,
+        onFlowComplete: widget.onFlowComplete,
+        subStepsPerStepPattern: widget.subStepsPerStepPattern,
+        onSubStepChanged: widget.onSubStepChanged,
+        onValidate: widget.onValidate,
+        initialSubStep: (widget.initialPage ?? 0) + 1,
+        stepConfigurations: widget.stepConfigurations,
+      ),
       child: Scaffold(
         appBar: widget.appBar,
         body: _bodyBloc(),
@@ -165,25 +172,36 @@ class _StepsNavigatorState extends State<StepsNavigator> {
     return BlocBuilder<StepsFlowCubit, StepsFlowState>(
       builder: (context, state) {
         final cubit = context.read<StepsFlowCubit>();
+        final currentStep = state.currentStep;
+        final currentSubStep = state.currentSubStep;
+        final stepConfig = widget.stepConfigurations[currentStep];
+        final subStepConfig = stepConfig?.getSubStepConfiguration(currentSubStep);
+
         return StepsNavBar(
           subStepsPerStep: widget.subStepsPerStepPattern,
           currentStep: state.currentStep,
           currentSubStep: state.currentSubStep,
           state: state,
-          onBackPressed:
-              () => cubit.onProcess(
-                NavigationDirection.backward,
-                state.currentStep,
-                state.currentSubStep,
-              ),
-          onNextPressed:
-              () => cubit.onProcess(
-                NavigationDirection.forward,
-                state.currentStep,
-                state.currentSubStep,
-              ),
-          customBackButton: widget.customBackButton,
-          customNextButton: widget.customNextButton,
+          onBackPressed: !(subStepConfig?.disableBackButton ?? stepConfig?.disableBackButton ?? false)
+              ? () => cubit.onProcess(
+                    NavigationDirection.backward,
+                    state.currentStep,
+                    state.currentSubStep,
+                  )
+              : null,
+          onNextPressed: !(subStepConfig?.disableNextButton ?? stepConfig?.disableNextButton ?? false)
+              ? () => cubit.onProcess(
+                    NavigationDirection.forward,
+                    state.currentStep,
+                    state.currentSubStep,
+                  )
+              : null,
+          customBackButton: subStepConfig?.customBackButton ?? 
+              stepConfig?.customBackButton ?? 
+              widget.customBackButton,
+          customNextButton: subStepConfig?.customNextButton ?? 
+              stepConfig?.customNextButton ?? 
+              widget.customNextButton,
           padding: widget.padding,
           progressColor: widget.progressColor,
           progressCurve: widget.progressCurve,

@@ -31,8 +31,8 @@ class StepsNavBar extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final Widget? customBackButton;
   final Widget? customNextButton;
-  final Function() onBackPressed;
-  final Function() onNextPressed;
+  final Future<void> Function()? onBackPressed;
+  final Future<void> Function()? onNextPressed;
   final Color? stepColor;
   final Color? progressColor;
   final Curve? progressCurve;
@@ -73,7 +73,11 @@ class StepsNavBar extends StatelessWidget {
         state.isLoading &&
         state.loadingDirection == NavigationDirection.backward;
     final onPressed =
-        (!state.isBackEnabled || isLoading) ? null : onBackPressed;
+        (!state.isBackEnabled || isLoading) ? null : () async {
+          if (onBackPressed != null) {
+            await onBackPressed!();
+          }
+        };
 
     if (customBackButton != null) {
       if (customBackButton is TextButton) {
@@ -164,7 +168,11 @@ class StepsNavBar extends StatelessWidget {
         state.isLoading &&
         state.loadingDirection == NavigationDirection.forward;
     final onPressed =
-        (!state.isNextEnabled || isLoading) ? null : onNextPressed;
+        (!state.isNextEnabled || isLoading) ? null : () async {
+          if (onNextPressed != null) {
+            await onNextPressed!();
+          }
+        };
 
     if (customNextButton != null) {
       if (customNextButton is TextButton) {

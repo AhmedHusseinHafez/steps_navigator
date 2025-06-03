@@ -30,13 +30,45 @@ class _MyAppState extends State<MyApp> {
         body: StepsNavigator(
           onValidate: (direction, step, subStep) async {
             // Simulate network delay
-            await Future.delayed(const Duration(milliseconds: 300));
+            await Future.delayed(const Duration(seconds: 2));
             if (direction == NavigationDirection.forward) {
               return true;
             }
             return true;
           },
           initialPage: 0,
+
+          stepConfigurations: {
+            1: StepConfiguration(
+              subStepConfigurations: {
+                2: SubStepConfiguration(
+                  skipValidation: true,
+                  customBackButton: IconButton(
+                    onPressed: () {},
+                    icon: Icon(Icons.arrow_back, color: Colors.red),
+                  ),
+                ),
+              },
+
+              customBackButton: IconButton(
+                onPressed: () {},
+                icon: Icon(Icons.arrow_back),
+              ),
+              customNextButton: IconButton(
+                onPressed: () {},
+                icon: Icon(Icons.arrow_forward),
+              ),
+              customEnter: (direction, step, subStep) async {
+                log('customEnter: $direction, $step, $subStep');
+              },
+              customExit: (direction, step, subStep) async {
+                log('customExit: $direction, $step, $subStep');
+              },
+              skipValidation: false,
+              // disableBackButton: false,
+              // disableNextButton: false,
+            ),
+          },
           onScreenExit: (direction, step, subStep) async {
             log('onScreenExit: $direction, $step, $subStep');
           },
