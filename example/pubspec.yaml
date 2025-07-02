@@ -1,4 +1,4 @@
-name: expamle
+name: example
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -81,10 +81,10 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   # fonts:
-  #   - family: Schyler
+  #   - family: family
   #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
+  #       - asset: fonts/family-Regular.ttf
+  #       - asset: fonts/family-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro
   #     fonts:

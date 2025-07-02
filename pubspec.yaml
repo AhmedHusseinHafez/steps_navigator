@@ -8,7 +8,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 homepage: "https://github.com/AhmedHusseinHafez/steps_navigator"
 repository: "https://github.com/AhmedHusseinHafez/steps_navigator"
 
-version: 3.0.1
+version: 3.0.2
 
 environment:
   sdk: ^3.7.2
@@ -25,6 +25,9 @@ dependencies:
   flutter_bloc: ^9.1.1
   bloc: ^9.0.0
   rxdart: ^0.28.0
+  
+  # For Freezed
+  freezed_annotation: ^3.0.0
 
 
 dev_dependencies:
@@ -36,6 +39,7 @@ dev_dependencies:
   # For Gen Models
   build_runner: ^2.4.15
   json_serializable: ^6.9.4
+  freezed: ^3.0.6
 
 flutter:
 

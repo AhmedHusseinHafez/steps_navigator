@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:expamle/home/home.dart';
+import 'package:example/home/home.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:example/bloc_observer.dart';
 
 void main() {
-  // Bloc.observer = MyBlocObserver();
+  Bloc.observer = MyBlocObserver();
   runApp(MaterialApp(title: 'Flutter Demo', theme: _theme(), home: Home()));
 }
 

@@ -1,8 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'navigation_direction_v2.dart';
 import 'step_configuration_v2.dart';
 
 part 'steps_flow_state.dart';
+part 'steps_flow_cubit.freezed.dart';
 
 class StepsFlowCubit extends Cubit<StepsFlowState> {
   StepsFlowCubit({
@@ -227,7 +229,7 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
       }
 
       // Update state after all enter callbacks complete
-      onSubStepChanged?.call(currentStep, decrementNewSubStep);
+      onSubStepChanged?.call(newBackStep, decrementNewSubStep);
       emit(
         StepsFlowState(
           currentStep: newBackStep,
