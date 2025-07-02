@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:steps_navigator/src/widgets/step_progress_with_spacing.dart';
-import 'package:steps_navigator/src/logic/steps_flow_cubit.dart';
-import 'package:steps_navigator/src/logic/navigation_direction.dart';
+import 'package:steps_navigator_v2/src/widgets/step_progress_with_spacing.dart';
+import 'package:steps_navigator_v2/src/logic/steps_flow_cubit.dart';
+import 'package:steps_navigator_v2/src/logic/navigation_direction_v2.dart';
 
 class StepsNavBar extends StatelessWidget {
   const StepsNavBar({
@@ -71,13 +71,15 @@ class StepsNavBar extends StatelessWidget {
   Widget _buildBackButton(BuildContext context) {
     final isLoading =
         state.isLoading &&
-        state.loadingDirection == NavigationDirection.backward;
+        state.loadingDirection == NavigationDirectionV2.backward;
     final onPressed =
-        (!state.isBackEnabled || isLoading) ? null : () async {
-          if (onBackPressed != null) {
-            await onBackPressed!();
-          }
-        };
+        (!state.isBackEnabled || isLoading)
+            ? null
+            : () async {
+              if (onBackPressed != null) {
+                await onBackPressed!();
+              }
+            };
 
     if (customBackButton != null) {
       if (customBackButton is TextButton) {
@@ -166,13 +168,15 @@ class StepsNavBar extends StatelessWidget {
   Widget _buildNextButton(BuildContext context) {
     final isLoading =
         state.isLoading &&
-        state.loadingDirection == NavigationDirection.forward;
+        state.loadingDirection == NavigationDirectionV2.forward;
     final onPressed =
-        (!state.isNextEnabled || isLoading) ? null : () async {
-          if (onNextPressed != null) {
-            await onNextPressed!();
-          }
-        };
+        (!state.isNextEnabled || isLoading)
+            ? null
+            : () async {
+              if (onNextPressed != null) {
+                await onNextPressed!();
+              }
+            };
 
     if (customNextButton != null) {
       if (customNextButton is TextButton) {

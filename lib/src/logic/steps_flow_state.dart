@@ -4,7 +4,7 @@ class StepsFlowState {
   final int currentStep;
   final int currentSubStep;
   final bool isLoading;
-  final NavigationDirection? loadingDirection;
+  final NavigationDirectionV2? loadingDirection;
   final bool isNextEnabled;
   final bool isBackEnabled;
 
@@ -21,7 +21,7 @@ class StepsFlowState {
     int? currentStep,
     int? currentSubStep,
     bool? isLoading,
-    NavigationDirection? loadingDirection,
+    NavigationDirectionV2? loadingDirection,
     bool? isNextEnabled,
     bool? isBackEnabled,
   }) {

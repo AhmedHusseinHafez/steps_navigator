@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'navigation_direction.dart';
-import 'step_configuration.dart';
+import 'navigation_direction_v2.dart';
+import 'step_configuration_v2.dart';
 
 part 'steps_flow_state.dart';
 
@@ -25,26 +25,29 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
   final List<int> subStepsPerStepPattern;
   final void Function(int step, int subStep)? onSubStepChanged;
   final Future<bool> Function(
-    NavigationDirection direction,
+    NavigationDirectionV2 direction,
     int step,
     int subStep,
-  )? onValidate;
+  )?
+  onValidate;
   final Future<void> Function(
-    NavigationDirection direction,
+    NavigationDirectionV2 direction,
     int step,
     int subStep,
-  )? onScreenEnter;
+  )?
+  onScreenEnter;
   final Future<void> Function(
-    NavigationDirection direction,
+    NavigationDirectionV2 direction,
     int step,
     int subStep,
-  )? onScreenExit;
+  )?
+  onScreenExit;
   final Future<void> Function(int step)? onStepComplete;
   final Future<void> Function()? onFlowComplete;
   final Map<int, StepConfiguration> stepConfigurations;
 
   Future<void> onProcess(
-    NavigationDirection direction,
+    NavigationDirectionV2 direction,
     int step,
     int subStep,
   ) async {
@@ -65,13 +68,15 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
       subStepsPerStepPattern,
     );
 
-    if (direction == NavigationDirection.forward) {
+    if (direction == NavigationDirectionV2.forward) {
       // Get step configuration if available
       final stepConfig = stepConfigurations[currentStep];
       final subStepConfig = stepConfig?.getSubStepConfiguration(currentSubStep);
 
       // Skip validation if configured
-      if (!(subStepConfig?.skipValidation ?? stepConfig?.skipValidation ?? false)) {
+      if (!(subStepConfig?.skipValidation ??
+          stepConfig?.skipValidation ??
+          false)) {
         if (onValidate != null) {
           emit(state.copyWith(isLoading: true, loadingDirection: direction));
           final isValid = await onValidate!(
@@ -84,15 +89,68 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
         }
       }
 
+      // Set loading state before exit callbacks
+      emit(state.copyWith(isLoading: true, loadingDirection: direction));
+
       // Call custom exit if available
       if (subStepConfig?.customExit != null) {
-        await subStepConfig!.customExit!(direction, currentStep, currentSubStep);
+        await subStepConfig!.customExit!(
+          direction,
+          currentStep,
+          currentSubStep,
+        );
       } else if (stepConfig?.customExit != null) {
         await stepConfig!.customExit!(direction, currentStep, currentSubStep);
       } else if (onScreenExit != null) {
         await onScreenExit!(direction, currentStep, currentSubStep);
       }
 
+      // Clear loading state after exit callbacks
+      emit(state.copyWith(isLoading: false, loadingDirection: null));
+
+      // Check if we completed a step
+      if (currentStep != newNextStep && onStepComplete != null) {
+        emit(state.copyWith(isLoading: true, loadingDirection: direction));
+        await onStepComplete!(currentStep);
+        emit(state.copyWith(isLoading: false, loadingDirection: null));
+      }
+
+      // Check if we completed the flow
+      if (incrementNewSubStep == totalSubSteps && onFlowComplete != null) {
+        emit(state.copyWith(isLoading: true, loadingDirection: direction));
+        await onFlowComplete!();
+        emit(state.copyWith(isLoading: false, loadingDirection: null));
+      }
+
+      // Call custom enter if available
+      final nextStepConfig = stepConfigurations[newNextStep];
+      final nextSubStepConfig = nextStepConfig?.getSubStepConfiguration(
+        incrementNewSubStep,
+      );
+
+      if (nextSubStepConfig?.customEnter != null) {
+        emit(state.copyWith(isLoading: true, loadingDirection: direction));
+        await nextSubStepConfig!.customEnter!(
+          direction,
+          newNextStep,
+          incrementNewSubStep,
+        );
+        emit(state.copyWith(isLoading: false, loadingDirection: null));
+      } else if (nextStepConfig?.customEnter != null) {
+        emit(state.copyWith(isLoading: true, loadingDirection: direction));
+        await nextStepConfig!.customEnter!(
+          direction,
+          newNextStep,
+          incrementNewSubStep,
+        );
+        emit(state.copyWith(isLoading: false, loadingDirection: null));
+      } else {
+        emit(state.copyWith(isLoading: true, loadingDirection: direction));
+        await onScreenEnterProcess(newNextStep, incrementNewSubStep);
+        emit(state.copyWith(isLoading: false, loadingDirection: null));
+      }
+
+      // Update state after all enter callbacks complete
       onSubStepChanged?.call(currentStep, incrementNewSubStep);
       emit(
         StepsFlowState(
@@ -100,35 +158,15 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
           currentSubStep: incrementNewSubStep,
         ),
       );
-
-      // Check if we completed a step
-      if (currentStep != newNextStep && onStepComplete != null) {
-        await onStepComplete!(currentStep);
-      }
-
-      // Check if we completed the flow
-      if (incrementNewSubStep == totalSubSteps && onFlowComplete != null) {
-        await onFlowComplete!();
-      }
-
-      // Call custom enter if available
-      final nextStepConfig = stepConfigurations[newNextStep];
-      final nextSubStepConfig = nextStepConfig?.getSubStepConfiguration(incrementNewSubStep);
-
-      if (nextSubStepConfig?.customEnter != null) {
-        await nextSubStepConfig!.customEnter!(direction, newNextStep, incrementNewSubStep);
-      } else if (nextStepConfig?.customEnter != null) {
-        await nextStepConfig!.customEnter!(direction, newNextStep, incrementNewSubStep);
-      } else {
-        await onScreenEnterProcess(newNextStep, incrementNewSubStep);
-      }
-    } else if (direction == NavigationDirection.backward) {
+    } else if (direction == NavigationDirectionV2.backward) {
       // Get step configuration if available
       final stepConfig = stepConfigurations[currentStep];
       final subStepConfig = stepConfig?.getSubStepConfiguration(currentSubStep);
 
       // Skip validation if configured
-      if (!(subStepConfig?.skipValidation ?? stepConfig?.skipValidation ?? false)) {
+      if (!(subStepConfig?.skipValidation ??
+          stepConfig?.skipValidation ??
+          false)) {
         if (onValidate != null) {
           emit(state.copyWith(isLoading: true, loadingDirection: direction));
           final isValid = await onValidate!(
@@ -141,15 +179,54 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
         }
       }
 
+      // Set loading state before exit callbacks
+      emit(state.copyWith(isLoading: true, loadingDirection: direction));
+
       // Call custom exit if available
       if (subStepConfig?.customExit != null) {
-        await subStepConfig!.customExit!(direction, currentStep, currentSubStep);
+        await subStepConfig!.customExit!(
+          direction,
+          currentStep,
+          currentSubStep,
+        );
       } else if (stepConfig?.customExit != null) {
         await stepConfig!.customExit!(direction, currentStep, currentSubStep);
       } else if (onScreenExit != null) {
         await onScreenExit!(direction, currentStep, currentSubStep);
       }
 
+      // Clear loading state after exit callbacks
+      emit(state.copyWith(isLoading: false, loadingDirection: null));
+
+      // Call custom enter if available
+      final backStepConfig = stepConfigurations[newBackStep];
+      final backSubStepConfig = backStepConfig?.getSubStepConfiguration(
+        decrementNewSubStep,
+      );
+
+      if (backSubStepConfig?.customEnter != null) {
+        emit(state.copyWith(isLoading: true, loadingDirection: direction));
+        await backSubStepConfig!.customEnter!(
+          direction,
+          newBackStep,
+          decrementNewSubStep,
+        );
+        emit(state.copyWith(isLoading: false, loadingDirection: null));
+      } else if (backStepConfig?.customEnter != null) {
+        emit(state.copyWith(isLoading: true, loadingDirection: direction));
+        await backStepConfig!.customEnter!(
+          direction,
+          newBackStep,
+          decrementNewSubStep,
+        );
+        emit(state.copyWith(isLoading: false, loadingDirection: null));
+      } else {
+        emit(state.copyWith(isLoading: true, loadingDirection: direction));
+        await onScreenEnterProcess(newBackStep, decrementNewSubStep);
+        emit(state.copyWith(isLoading: false, loadingDirection: null));
+      }
+
+      // Update state after all enter callbacks complete
       onSubStepChanged?.call(currentStep, decrementNewSubStep);
       emit(
         StepsFlowState(
@@ -157,18 +234,6 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
           currentSubStep: decrementNewSubStep,
         ),
       );
-
-      // Call custom enter if available
-      final backStepConfig = stepConfigurations[newBackStep];
-      final backSubStepConfig = backStepConfig?.getSubStepConfiguration(decrementNewSubStep);
-
-      if (backSubStepConfig?.customEnter != null) {
-        await backSubStepConfig!.customEnter!(direction, newBackStep, decrementNewSubStep);
-      } else if (backStepConfig?.customEnter != null) {
-        await backStepConfig!.customEnter!(direction, newBackStep, decrementNewSubStep);
-      } else {
-        await onScreenEnterProcess(newBackStep, decrementNewSubStep);
-      }
     }
   }
 
@@ -195,7 +260,7 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
   Future<void> onScreenEnterProcess(int stepIndex, int subStepIndex) async {
     if (onScreenEnter != null) {
       await onScreenEnter!(
-        state.loadingDirection ?? NavigationDirection.forward,
+        state.loadingDirection ?? NavigationDirectionV2.forward,
         stepIndex,
         subStepIndex,
       );

@@ -40,7 +40,7 @@ dependencies:
   #   git:
   #     url: https://github.com/AhmedHusseinHafez/steps_navigator.git
   #     ref: v1.0.0
-  steps_navigator:
+  steps_navigator_v2:
     path: ../
 dev_dependencies:
   flutter_test:

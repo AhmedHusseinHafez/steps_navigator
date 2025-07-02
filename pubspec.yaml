@@ -1,4 +1,4 @@
-name: steps_navigator
+name: steps_navigator_v2
 description: A new Flutter package project.
 
 license: MIT
@@ -8,7 +8,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 homepage: "https://github.com/AhmedHusseinHafez/steps_navigator"
 repository: "https://github.com/AhmedHusseinHafez/steps_navigator"
 
-version: 3.0.0
+version: 3.0.1
 
 environment:
   sdk: ^3.7.2

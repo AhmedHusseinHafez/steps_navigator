@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:steps_navigator/src/helper/steps_navigator_validator.dart';
-import 'package:steps_navigator/src/logic/steps_flow_cubit.dart';
-import 'package:steps_navigator/src/widgets/steps_nav_bar.dart';
-import 'package:steps_navigator/steps_navigator.dart';
+import 'package:steps_navigator_v2/src/helper/steps_navigator_validator.dart';
+import 'package:steps_navigator_v2/src/logic/steps_flow_cubit.dart';
+import 'package:steps_navigator_v2/src/widgets/steps_nav_bar.dart';
+import 'package:steps_navigator_v2/steps_navigator_v2.dart';
 
-class StepsNavigator extends StatelessWidget {
-  StepsNavigator({
+class StepsNavigatorV2 extends StatelessWidget {
+  StepsNavigatorV2({
     super.key,
     this.appBar,
     required this.screens,
@@ -69,19 +69,19 @@ class StepsNavigator extends StatelessWidget {
   final List<int> subStepsPerStepPattern;
   final void Function(int step, int subStep)? onSubStepChanged;
   final Future<bool> Function(
-    NavigationDirection direction,
+    NavigationDirectionV2 direction,
     int step,
     int subStep,
   )?
   onValidate;
   final Future<void> Function(
-    NavigationDirection direction,
+    NavigationDirectionV2 direction,
     int step,
     int subStep,
   )?
   onScreenEnter;
   final Future<void> Function(
-    NavigationDirection direction,
+    NavigationDirectionV2 direction,
     int step,
     int subStep,
   )?
@@ -187,7 +187,7 @@ class _StepsNavigatorContent extends StatefulWidget {
 
 class _StepsNavigatorContentState extends State<_StepsNavigatorContent> {
   late final PageController _pageController;
-  final _navigationSubject = BehaviorSubject<NavigationDirection>();
+  final _navigationSubject = BehaviorSubject<NavigationDirectionV2>();
   late Duration _debounceDuration;
 
   @override
@@ -279,7 +279,7 @@ class _StepsNavigatorContentState extends State<_StepsNavigatorContent> {
                       stepConfig?.disableBackButton ??
                       false)
                   ? () async {
-                    _navigationSubject.add(NavigationDirection.backward);
+                    _navigationSubject.add(NavigationDirectionV2.backward);
                     return;
                   }
                   : null,
@@ -288,7 +288,7 @@ class _StepsNavigatorContentState extends State<_StepsNavigatorContent> {
                       stepConfig?.disableNextButton ??
                       false)
                   ? () async {
-                    _navigationSubject.add(NavigationDirection.forward);
+                    _navigationSubject.add(NavigationDirectionV2.forward);
                     return;
                   }
                   : null,

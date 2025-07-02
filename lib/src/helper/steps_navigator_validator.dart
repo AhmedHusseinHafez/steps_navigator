@@ -1,11 +1,18 @@
 import 'package:flutter/widgets.dart';
-import 'package:steps_navigator/src/logic/steps_flow_cubit.dart';
-import 'package:steps_navigator/src/logic/step_configuration.dart';
+import 'package:steps_navigator_v2/src/logic/steps_flow_cubit.dart';
+import 'package:steps_navigator_v2/src/logic/step_configuration_v2.dart';
 
 /// A helper class for validating StepsNavigator constructor parameters
 class StepsNavigatorValidator {
   static void validate({
-    required List<Widget Function(StepsFlowState state, void Function({bool? isNextEnabled, bool? isBackEnabled}) updateButtonStates)> screens,
+    required List<
+      Widget Function(
+        StepsFlowState state,
+        void Function({bool? isNextEnabled, bool? isBackEnabled})
+        updateButtonStates,
+      )
+    >
+    screens,
     required List<int> subStepsPerStepPattern,
     required int initialPage,
     required Map<int, StepConfiguration> stepConfigurations,

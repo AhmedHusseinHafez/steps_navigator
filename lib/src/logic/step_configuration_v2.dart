@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'navigation_direction.dart';
+import 'navigation_direction_v2.dart';
 
 /// Configuration for individual sub-steps in the navigation flow
-class SubStepConfiguration {
-  const SubStepConfiguration({
+class SubStepConfigurationV2 {
+  const SubStepConfigurationV2({
     this.skipValidation = false,
     this.disableBackButton = false,
     this.disableNextButton = false,
@@ -19,15 +19,17 @@ class SubStepConfiguration {
   final Widget? customBackButton;
   final Widget? customNextButton;
   final Future<void> Function(
-    NavigationDirection direction,
+    NavigationDirectionV2 direction,
     int step,
     int subStep,
-  )? customEnter;
+  )?
+  customEnter;
   final Future<void> Function(
-    NavigationDirection direction,
+    NavigationDirectionV2 direction,
     int step,
     int subStep,
-  )? customExit;
+  )?
+  customExit;
 }
 
 /// Configuration for individual steps in the navigation flow
@@ -49,19 +51,21 @@ class StepConfiguration {
   final Widget? customBackButton;
   final Widget? customNextButton;
   final Future<void> Function(
-    NavigationDirection direction,
+    NavigationDirectionV2 direction,
     int step,
     int subStep,
-  )? customEnter;
+  )?
+  customEnter;
   final Future<void> Function(
-    NavigationDirection direction,
+    NavigationDirectionV2 direction,
     int step,
     int subStep,
-  )? customExit;
-  
+  )?
+  customExit;
+
   /// Map of sub-step configurations where the key is the sub-step number (1-based)
   /// and the value is the configuration for that sub-step
-  final Map<int, SubStepConfiguration> subStepConfigurations;
+  final Map<int, SubStepConfigurationV2> subStepConfigurations;
 
   /// Creates a map of step configurations where the key is the step number (1-based)
   /// and the value is the configuration for that step.
@@ -72,7 +76,7 @@ class StepConfiguration {
   }
 
   /// Gets the configuration for a specific sub-step, falling back to step configuration if not specified
-  SubStepConfiguration? getSubStepConfiguration(int subStep) {
+  SubStepConfigurationV2? getSubStepConfiguration(int subStep) {
     return subStepConfigurations[subStep];
   }
-} 
+}
