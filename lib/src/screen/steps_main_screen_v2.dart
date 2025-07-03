@@ -249,11 +249,16 @@ class _StepsNavigatorContentState extends State<_StepsNavigatorContent> {
       controller: _pageController,
       itemCount: widget.screens.length,
       itemBuilder: (context, index) {
+        // Only call updateButtonStates for the currently visible screen
+        final isCurrentScreen = index == state.currentSubStep - 1;
+
         return widget.screens[index](state, ({isNextEnabled, isBackEnabled}) {
-          context.read<StepsFlowCubit>().updateButtonStates(
-            isNextEnabled: isNextEnabled,
-            isBackEnabled: isBackEnabled,
-          );
+          if (isCurrentScreen) {
+            context.read<StepsFlowCubit>().updateButtonStates(
+              isNextEnabled: isNextEnabled,
+              isBackEnabled: isBackEnabled,
+            );
+          }
         });
       },
     );

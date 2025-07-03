@@ -251,12 +251,19 @@ class StepsFlowCubit extends Cubit<StepsFlowState> {
   }
 
   void updateButtonStates({bool? isNextEnabled, bool? isBackEnabled}) {
-    emit(
-      state.copyWith(
-        isNextEnabled: isNextEnabled ?? state.isNextEnabled,
-        isBackEnabled: isBackEnabled ?? state.isBackEnabled,
-      ),
-    );
+    final newIsNextEnabled = isNextEnabled ?? state.isNextEnabled;
+    final newIsBackEnabled = isBackEnabled ?? state.isBackEnabled;
+
+    // Only emit if the values actually changed
+    if (newIsNextEnabled != state.isNextEnabled ||
+        newIsBackEnabled != state.isBackEnabled) {
+      emit(
+        state.copyWith(
+          isNextEnabled: newIsNextEnabled,
+          isBackEnabled: newIsBackEnabled,
+        ),
+      );
+    }
   }
 
   Future<void> onScreenEnterProcess(int stepIndex, int subStepIndex) async {

@@ -79,17 +79,17 @@ class _HomeState extends State<Home> {
           log('Flow completed!');
         },
         onScreenEnter: (direction, step, subStep) async {
-          switch (subStep) {
-            case 1:
-              await Future.delayed(const Duration(seconds: 5));
-              _stepData = "This is step one data";
-              break;
-            case 2:
-              await Future.delayed(const Duration(seconds: 5));
-              _stepData = "This is step two data";
-              break;
-            case 3:
-          }
+          // switch (subStep) {
+          //   case 1:
+          //     await Future.delayed(const Duration(seconds: 5));
+          //     _stepData = "This is step one data";
+          //     break;
+          //   case 2:
+          //     await Future.delayed(const Duration(seconds: 5));
+          //     _stepData = "This is step two data";
+          //     break;
+          //   case 3:
+          // }
 
           log('onScreenEnter: $direction, $step, $subStep');
         },
@@ -121,7 +121,9 @@ class _HomeState extends State<Home> {
         screens: List.generate(
           subStepsPerStepPattern.fold<int>(0, (sum, count) => sum + count),
           (index) => (state, updateButtonStates) {
-            // Example: Disable next button on even steps, disable back button on first step
+            log('index: $index');
+            // updateButtonStates is now only called for the visible screen
+            // so we can safely call it here without causing unnecessary rebuilds
             updateButtonStates(
               isNextEnabled: _isNextEnabled,
               isBackEnabled: _isBackEnabled,
