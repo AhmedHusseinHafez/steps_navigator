@@ -224,7 +224,7 @@ class _StepsNavigatorContentState extends State<_StepsNavigatorContent> {
   }
 
   Widget _bodyBloc() {
-    return BlocConsumer<StepsFlowCubit, StepsFlowState>(
+    return BlocListener<StepsFlowCubit, StepsFlowState>(
       listenWhen:
           (previous, current) =>
               previous.currentSubStep != current.currentSubStep,
@@ -239,27 +239,38 @@ class _StepsNavigatorContentState extends State<_StepsNavigatorContent> {
           );
         }
       },
-      builder: _body,
+      child: _body(),
     );
   }
 
-  Widget _body(BuildContext context, StepsFlowState state) {
-    return PageView.builder(
-      physics: const NeverScrollableScrollPhysics(),
-      controller: _pageController,
-      itemCount: widget.screens.length,
-      itemBuilder: (context, index) {
-        // Only call updateButtonStates for the currently visible screen
-        final isCurrentScreen = index == state.currentSubStep - 1;
+  Widget _body() {
+    return BlocBuilder<StepsFlowCubit, StepsFlowState>(
+      buildWhen: (previous, current) {
+        // Only rebuild when the current sub-step changes
+        return previous.currentSubStep != current.currentSubStep;
+      },
+      builder: (context, state) {
+        return PageView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          controller: _pageController,
+          itemCount: widget.screens.length,
+          itemBuilder: (context, index) {
+            // Only call updateButtonStates for the currently visible screen
+            final isCurrentScreen = index == state.currentSubStep - 1;
 
-        return widget.screens[index](state, ({isNextEnabled, isBackEnabled}) {
-          if (isCurrentScreen) {
-            context.read<StepsFlowCubit>().updateButtonStates(
-              isNextEnabled: isNextEnabled,
-              isBackEnabled: isBackEnabled,
-            );
-          }
-        });
+            return widget.screens[index](state, ({
+              isNextEnabled,
+              isBackEnabled,
+            }) {
+              if (isCurrentScreen) {
+                context.read<StepsFlowCubit>().updateButtonStates(
+                  isNextEnabled: isNextEnabled,
+                  isBackEnabled: isBackEnabled,
+                );
+              }
+            });
+          },
+        );
       },
     );
   }
