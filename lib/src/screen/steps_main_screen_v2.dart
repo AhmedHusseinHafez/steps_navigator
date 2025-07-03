@@ -258,17 +258,20 @@ class _StepsNavigatorContentState extends State<_StepsNavigatorContent> {
             // Only call updateButtonStates for the currently visible screen
             final isCurrentScreen = index == state.currentSubStep - 1;
 
-            return widget.screens[index](state, ({
-              isNextEnabled,
-              isBackEnabled,
-            }) {
-              if (isCurrentScreen) {
-                context.read<StepsFlowCubit>().updateButtonStates(
-                  isNextEnabled: isNextEnabled,
-                  isBackEnabled: isBackEnabled,
-                );
-              }
-            });
+            // Use RepaintBoundary to isolate repaints and prevent unnecessary rebuilds
+            return RepaintBoundary(
+              child: widget.screens[index](state, ({
+                isNextEnabled,
+                isBackEnabled,
+              }) {
+                if (isCurrentScreen) {
+                  context.read<StepsFlowCubit>().updateButtonStates(
+                    isNextEnabled: isNextEnabled,
+                    isBackEnabled: isBackEnabled,
+                  );
+                }
+              }),
+            );
           },
         );
       },
